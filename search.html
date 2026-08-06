@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Travella — Explore</title>
+<meta name="description" content="Quintessential spots across India, grouped by highly matched tags and community ratings.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+<link href="styles.css" rel="stylesheet">
+<style>
+  .explore-top { padding-top: clamp(18px, 4vw, 34px); }
+  .capsule-rail { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+  .capsule {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 16px; border-radius: var(--r-full);
+    border: 1.5px solid var(--ink-900); font-weight: 700; font-size: var(--fs-sm);
+    transition: all 0.2s var(--ease);
+  }
+  .capsule.active { background: var(--ink-900); color: #fff; }
+  .tag-cloud { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tag-cloud .chip { cursor: pointer; }
+  .tag-cloud .chip b { color: var(--brand-700); font-weight: 800; }
+</style>
+</head>
+<body>
+
+<main class="container explore-top">
+  <!-- Hero stage -->
+  <div class="hero-stage anim-in">
+    <div id="stageCarousel" class="carousel-fill"></div>
+    <div class="shade"></div>
+    <div class="count-chip" id="galleryCount"><i class="fa-regular fa-images"></i> 0</div>
+    <div class="stage-caption">
+      <h1 id="mainTitle">Destination, India</h1>
+      <p id="mainSub">Quintessential spots sharing highly matched tags and community ratings.</p>
+    </div>
+  </div>
+
+  <!-- Capsules -->
+  <div class="capsule-rail">
+    <button class="capsule active" data-view="overview"><i class="fa-solid fa-layer-group"></i> Overview</button>
+    <button class="capsule" data-view="tags"><i class="fa-solid fa-tags"></i> Highly matched tags</button>
+  </div>
+
+  <!-- Content -->
+  <div id="contentWrap">
+    <div class="state-box" style="min-height:220px;"><div class="state-ico"><i class="fa-solid fa-compass fa-spin"></i></div><p>Analysing data signatures…</p></div>
+  </div>
+</main>
+
+<script src="app.js"></script>
+<script>
+const T = window.Travel;
+
+/* ---------------- main build ---------------- */
+async function build() {
+  const params = new URLSearchParams(location.search);
+  const q = (params.get("query") || "").trim();
+  const focusFlag = params.get("focus") === "1";
+  const searchInput = document.getElementById("topSearch");
+
+  /* ---- empty state: a true search hub (no fake default query) ---- */
+  if (!q) {
+    document.getElementById("mainTitle").textContent = "Explore India";
+    document.getElementById("mainSub").textContent = "Search a city, state or landmark — or jump into a popular pick below.";
+    document.querySelector(".capsule-rail").style.display = "none";
+    document.getElementById("galleryCount").innerHTML = '<i class="fa-regular fa-images"></i> 6';
+    document.getElementById("contentWrap").innerHTML = `
+      <div class="state-box" style="min-height:42vh;">
+        <div class="state-ico"><i class="fa-solid fa-magnifying-glass"></i></div>
+        <h3 class="h3">What are you looking for?</h3>
+        <p>Try a city, state, temple, museum or river.</p>
+        <div class="tag-cloud" style="justify-content:center;margin-top:16px;max-width:600px;">
+          ${["Prayagraj", "Mumbai", "Varanasi", "Temples", "Heritage", "Boat rides", "Museums", "Nature"]
+            .map((t) => `<a class="chip" href="search.html?query=${encodeURIComponent(t)}"><i class="fa-solid fa-hashtag"></i>${t}</a>`).join("")}
+        </div>
+      </div>`;
+    if (searchInput) searchInput.value = "";
+    if (focusFlag && searchInput) { searchInput.focus(); searchInput.select(); }
+    return;
+  }
+
+  let target = q.replace(/prradesh/i, "Pradesh");
+  if (searchInput) searchInput.value = target;
+
+  const results = await T.fetchSearch(target, 36);
+  document.getElementById("mainTitle").textContent = `${target}, India`;
+
+  if (!results.length) {
+    document.getElementById("contentWrap").innerHTML =
+      `<div class="state-box"><div class="state-ico"><i class="fa-regular fa-face-frown"></i></div>
+       <h3 class="h3">No matches for “${T.esc(target)}”</h3>
+       <p>Try a city, state or landmark — e.g. Prayagraj, Mumbai, Varanasi.</p></div>`;
+    return;
+  }
+
+  /* hero slideshow (real sliding carousel, supports video) */
+  const picks = T
+    .imagesOf({ thumbnail: null, videourl: results.map((r) => r.thumbnail).filter(Boolean) })
+    .sort(() => 0.5 - Math.random()).slice(0, 6);
+  T.createCarousel(document.getElementById("stageCarousel"), picks.map(T.slideOf), {
+    counter: false, dots: false, interval: 4000,
+  });
+  document.getElementById("galleryCount").innerHTML =
+    `<i class="fa-regular fa-images"></i> ${results.length * 3}`;
+
+  /* group by the MOST SPECIFIC (rarest) category per item,
+     so sections feel curated instead of echoing generic tags */
+  const freq = {};
+  results.forEach((item) => T.tagsOf(item).forEach((t) => (freq[t] = (freq[t] || 0) + 1)));
+  const map = {};
+  results.forEach((item) => {
+    let tags = T.tagsOf(item);
+    if (!tags.length) tags = ["Sights & Landmarks"];
+    tags.sort((a, b) => (freq[a] || 1e9) - (freq[b] || 1e9) || a.localeCompare(b));
+    // rarest tag that is shared by at least one other result keeps groups alive
+    const key = tags.find((t) => (freq[t] || 0) >= 2) || tags[0];
+    (map[key] = map[key] || []).push(item);
+  });
+
+  /* keep sections that have 2+ places, dedupe identical sets, cap at 10, biggest first */
+  const seen = new Set();
+  const sections = [];
+  Object.entries(map).forEach(([cat, items]) => {
+    if (items.length < 2) return;
+    const ids = items.map((i) => String(i.id)).sort().join(",");
+    if (seen.has(ids)) return;
+    seen.add(ids);
+    sections.push([cat, items]);
+  });
+  sections.sort((a, b) => b[1].length - a[1].length);
+  sections.length = Math.min(sections.length, 10);
+
+  const overviewHtml = sections
+    .map(([cat, items]) => `
+      <div class="cat-block anim-up">
+        <div class="cat-title">
+          <h2><span class="eyebrow" style="margin-right:8px;">📍</span>${T.esc(cat)}</h2>
+          <span class="count">${items.length} places</span>
+        </div>
+        <div class="rail">${items.map(T.cardHTML).join("")}</div>
+      </div>`)
+    .join("");
+
+  /* tag cloud (reuses the freq map computed for grouping) */
+  const topTags = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 28);
+  const tagsHtml = `
+    <div class="cat-block anim-up">
+      <div class="cat-title"><h2><i class="fa-solid fa-tags" style="color:var(--brand-500);margin-right:8px;"></i>Highly matched tags</h2></div>
+      <div class="tag-cloud">
+        ${topTags.map(([t, n]) => `<a class="chip" href="search.html?query=${encodeURIComponent(t)}"><i class="fa-solid fa-hashtag"></i>${T.esc(t)} <b>${n}</b></a>`).join("")}
+      </div>
+    </div>`;
+
+  const wrap = document.getElementById("contentWrap");
+  wrap.innerHTML = overviewHtml ? overviewHtml + tagsHtml : tagsHtml;
+
+  /* capsule switching */
+  document.querySelectorAll(".capsule").forEach((c) => {
+    c.addEventListener("click", () => {
+      document.querySelectorAll(".capsule").forEach((x) => x.classList.remove("active"));
+      c.classList.add("active");
+      const view = c.dataset.view;
+      wrap.querySelectorAll(".cat-block").forEach((b) => {
+        b.style.display = view === "tags" && b.querySelector(".tag-cloud") ? "" : (view === "overview" && !b.querySelector(".tag-cloud") ? "" : "none");
+      });
+    });
+  });
+
+  T.initReveal();
+}
+
+build().catch((e) => {
+  console.error(e);
+  document.getElementById("contentWrap").innerHTML =
+    `<div class="state-box"><div class="state-ico"><i class="fa-solid fa-cloud-bolt"></i></div><p>Couldn't reach the destination database. Check your connection.</p></div>`;
+});
+
+/* topnav search already wired by renderShell; keep Enter-in-topnav working */
+T.renderShell("explore", { searchBox: true });
+</script>
+</body>
+</html>

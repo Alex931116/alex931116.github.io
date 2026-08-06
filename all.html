@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Travella — Destinations</title>
+<meta name="description" content="Browse every destination in the Travella index — temples, heritage, nature, museums and more.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+<link href="styles.css" rel="stylesheet">
+<style>
+  .list-top { padding-top: clamp(20px, 4vw, 44px); }
+  .list-top h1 { margin-top: 8px; }
+  .list-count { font-size: var(--fs-sm); color: var(--ink-400); font-weight: 600; margin-top: 6px; display: block; }
+  .chip-filter { border-width: 1.5px; }
+  .chip-filter.active { background: var(--ink-900); color: #fff; border-color: var(--ink-900); }
+  .load-more-wrap { display: grid; place-items: center; padding: 26px 0 10px; }
+  .grid-all { grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); }
+</style>
+</head>
+<body>
+
+<main class="container list-top">
+  <span class="eyebrow anim-up"><i class="fa-solid fa-earth-asia"></i> Destination index</span>
+  <h1 class="h1 anim-up delay-1" id="pageTitle">All destinations</h1>
+  <span class="list-count anim-up delay-1" id="pageCount">Loading the index…</span>
+
+  <div class="filter-rail anim-up delay-2" id="filterRail" style="margin-top:18px;"></div>
+
+  <div class="grid grid-all" id="destGrid" style="margin-top:10px;"></div>
+  <div class="load-more-wrap" id="loadMoreWrap" hidden>
+    <button class="btn btn-ghost" id="loadMoreBtn"><i class="fa-solid fa-plus"></i> Load more</button>
+  </div>
+</main>
+
+<script src="app.js"></script>
+<script>
+const T = window.Travel;
+
+const FILTERS = [
+  { label: "All", cat: "" },
+  { label: "🛕 Temples", cat: "Temple" },
+  { label: "🏛️ Heritage", cat: "Heritage" },
+  { label: "🌿 Nature", cat: "Nature" },
+  { label: "🏫 Museums", cat: "Museum" },
+  { label: "🚤 Boats", cat: "Boat" },
+  { label: "🌉 Landmarks", cat: "Landmark" },
+  { label: "⛪ Cathedrals", cat: "Church" },
+];
+
+let currentCat = "", page = 1, total = 0, hasMore = true, loading = false;
+
+function readQuery() {
+  const p = new URLSearchParams(location.search);
+  currentCat = (p.get("category") || "").trim();
+  page = 1;
+}
+
+function renderFilters() {
+  const rail = document.getElementById("filterRail");
+  rail.innerHTML = FILTERS.map((f) => `
+    <button class="chip chip-filter ${(f.cat === currentCat || (f.cat === "" && !currentCat)) ? "active" : ""}"
+            data-cat="${f.cat}">${f.label}</button>`).join("");
+  rail.querySelectorAll(".chip-filter").forEach((c) => {
+    c.addEventListener("click", () => {
+      const cat = c.dataset.cat;
+      const url = cat ? `all.html?category=${encodeURIComponent(cat)}` : "all.html";
+      history.pushState({}, "", url);
+      currentCat = cat;
+      renderFilters();
+      reload();
+    });
+  });
+}
+
+async function fetchPage() {
+  if (!currentCat) {
+    const res = await fetch(`${T.API}/sundarikanya?tag=&page=${page}&limit=60`);
+    const j = await res.json();
+    return j.data || [];
+  }
+  return T.fetchList(currentCat, page);
+}
+
+async function reload() {
+  page = 1; hasMore = true; total = 0;
+  const grid = document.getElementById("destGrid");
+  const count = document.getElementById("pageCount");
+  grid.innerHTML = T.skCards(8);
+  document.getElementById("loadMoreWrap").hidden = true;
+  try {
+    const items = await fetchPage();
+    total = items.length;
+    document.getElementById("pageTitle").textContent = currentCat || "All destinations";
+    count.textContent = items.length
+      ? `${items.length} place${items.length > 1 ? "s" : ""} · ${currentCat || "entire index"}`
+      : "No places matched this filter.";
+    grid.innerHTML = items.length ? items.map(T.cardHTML).join("") :
+      `<div class="state-box" style="grid-column:1/-1;">
+        <div class="state-ico"><i class="fa-regular fa-face-frown"></i></div>
+        <h3 class="h3">Nothing under “${T.esc(currentCat)}”</h3>
+        <p>Try a broader filter above.</p>
+      </div>`;
+    hasMore = items.length >= 60 || items.length === 30;
+    document.getElementById("loadMoreWrap").hidden = !hasMore;
+  } catch (e) {
+    console.error(e);
+    grid.innerHTML = `<div class="state-box" style="grid-column:1/-1;">
+      <div class="state-ico"><i class="fa-solid fa-cloud-bolt"></i></div>
+      <h3 class="h3">Couldn't load destinations</h3>
+      <p>Check your connection and try again.</p>
+    </div>`;
+  }
+  T.initReveal();
+}
+
+document.getElementById("loadMoreBtn").addEventListener("click", async () => {
+  if (loading) return;
+  loading = true;
+  page++;
+  const grid = document.getElementById("destGrid");
+  const btn = document.getElementById("loadMoreBtn");
+  btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Loading…';
+  try {
+    const more = await fetchPage();
+    grid.insertAdjacentHTML("beforeend", more.map(T.cardHTML).join(""));
+    total += more.length;
+    document.getElementById("pageCount").textContent =
+      `${total} places · ${currentCat || "entire index"}`;
+    hasMore = more.length > 0;
+    document.getElementById("loadMoreWrap").hidden = !hasMore;
+  } catch (e) {
+    console.error(e);
+    page--;
+  }
+  btn.innerHTML = '<i class="fa-solid fa-plus"></i> Load more';
+  loading = false;
+});
+
+readQuery();
+renderFilters();
+reload();
+
+T.renderShell("all", { searchBox: true });
+</script>
+</body>
+</html>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Travella — Tours &amp; Experiences</title>
+<meta name="description" content="Boat rides, temple walks, food trails and cultural shows across India.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+<link href="styles.css" rel="stylesheet">
+<style>
+  body { padding-bottom: 118px; }
+  .page-intro { padding-top: clamp(20px, 4vw, 44px); }
+  .page-intro h1 { margin-top: 8px; }
+
+  .x-search {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--r-full); padding: 12px 20px; box-shadow: var(--sh-sm);
+    margin-top: 18px;
+  }
+  .x-search:focus-within { box-shadow: 0 0 0 3px var(--brand-100); }
+  .x-search i { color: var(--ink-400); }
+  .x-search input { flex: 1; min-width: 0; font-weight: 500; font-size: var(--fs-sm); }
+
+  /* Featured experience */
+  .featured {
+    display: grid; gap: 0;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--r-xl); overflow: hidden; box-shadow: var(--sh-md);
+    margin-top: clamp(24px, 4vw, 36px);
+  }
+  .featured .fx-media { position: relative; min-height: 220px; }
+  .featured .fx-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .featured .fx-body { padding: clamp(20px, 4vw, 32px); display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+  @media (min-width: 900px) {
+    .featured { grid-template-columns: 1.15fr 1fr; }
+    .featured .fx-media { min-height: 380px; }
+  }
+
+  /* Events grid */
+  .events-grid { display: grid; gap: 14px; grid-template-columns: 1fr; }
+  @media (min-width: 720px) { .events-grid { grid-template-columns: 1fr 1fr; } }
+
+  .tour-mini { min-width: 210px; }
+  .tour-mini .x-media img { aspect-ratio: 3/2; }
+
+  .booking-bar {
+    position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%); z-index: 90;
+    width: min(92%, 460px); display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    background: rgba(255, 255, 255, 0.94); backdrop-filter: blur(16px);
+    border-radius: var(--r-full); padding: 10px 12px 10px 22px;
+    box-shadow: var(--sh-lg); border: 1px solid rgba(255, 255, 255, 0.9);
+  }
+  .booking-bar .bb-label { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-400); }
+  .booking-bar .bb-value { font-size: 1.15rem; font-weight: 800; }
+</style>
+</head>
+<body>
+
+<main class="container page-intro">
+  <span class="eyebrow anim-up"><i class="fa-solid fa-umbrella-beach"></i> Curated activities</span>
+  <h1 class="h1 anim-up delay-1" style="margin-top:8px;">Tours &amp; experiences</h1>
+  <p class="muted anim-up delay-1">Small-group boat rides, temple walks, food trails and cultural evenings — booked in minutes.</p>
+
+  <div class="x-search anim-up delay-2">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input id="xSearch" type="search" placeholder="Search tours and activities…" autocomplete="off">
+  </div>
+
+  <!-- Featured (random pick from live API) -->
+  <div class="section-head" style="margin-top:clamp(26px,4vw,38px);">
+    <div><span class="eyebrow"><i class="fa-solid fa-umbrella-beach"></i> Curated for you</span><h2 class="h2" style="margin-top:6px;">Featured experience</h2></div>
+    <button class="chip" id="shuffleBtn" type="button"><i class="fa-solid fa-shuffle"></i> Shuffle</button>
+  </div>
+  <div class="featured anim-up" id="featuredWrap">
+    <div class="fx-media"><div class="sk" style="position:absolute;inset:0;border-radius:0;"></div></div>
+    <div class="fx-body">
+      <div class="sk" style="height:16px;width:140px;"></div>
+      <div class="sk" style="height:26px;width:72%;"></div>
+      <div class="sk" style="height:12px;width:96%;"></div>
+      <div class="sk" style="height:12px;width:82%;"></div>
+      <div class="sk" style="height:36px;width:170px;margin-top:8px;border-radius:99px;"></div>
+    </div>
+  </div>
+
+  <!-- Categories (derived from live data) -->
+  <section class="section">
+    <div class="section-head">
+      <div><span class="eyebrow">Browse by mood</span><h2 class="h2" style="margin-top:6px;">Categories</h2></div>
+    </div>
+    <div class="grid" id="catGrid" style="grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),1fr));"></div>
+  </section>
+
+  <!-- Popular tours (random from live API) -->
+  <section class="section">
+    <div class="section-head">
+      <div><span class="eyebrow">Traveller favourites</span><h2 class="h2" style="margin-top:6px;">Popular tours</h2></div>
+      <a class="view-all" href="search.html?query=Boat">View all <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+    <div class="rail" id="tourRail"></div>
+  </section>
+
+  <!-- Events -->
+  <section class="section">
+    <div class="section-head">
+      <div><span class="eyebrow"><i class="fa-solid fa-calendar-days"></i> Mark your calendar</span><h2 class="h2" style="margin-top:6px;">Upcoming events</h2></div>
+    </div>
+    <div class="events-grid">
+      <div class="event-card">
+        <div class="ev-ico">🪔</div>
+        <div style="flex:1;min-width:0;">
+          <h3 class="h3">Kumbh Festival</h3>
+          <div class="ev-when"><i class="fa-regular fa-calendar"></i> Jan 15 – Feb 25</div>
+        </div>
+        <button class="btn btn-sm btn-dark">Details</button>
+      </div>
+      <div class="event-card">
+        <div class="ev-ico">🌅</div>
+        <div style="flex:1;min-width:0;">
+          <h3 class="h3">Ganga Aarti</h3>
+          <div class="ev-when"><i class="fa-regular fa-calendar"></i> Daily evening</div>
+        </div>
+        <button class="btn btn-sm btn-dark">Details</button>
+      </div>
+      <div class="event-card">
+        <div class="ev-ico">🎶</div>
+        <div style="flex:1;min-width:0;">
+          <h3 class="h3">Soul of Ganga — Sound &amp; Light</h3>
+          <div class="ev-when"><i class="fa-regular fa-calendar"></i> Weekends, 7 PM</div>
+        </div>
+        <button class="btn btn-sm btn-dark">Details</button>
+      </div>
+      <div class="event-card">
+        <div class="ev-ico">📿</div>
+        <div style="flex:1;min-width:0;">
+          <h3 class="h3">Sangam Heritage Walk</h3>
+          <div class="ev-when"><i class="fa-regular fa-calendar"></i> Every Sunday, 6 AM</div>
+        </div>
+        <button class="btn btn-sm btn-dark">Details</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Booking bar -->
+<div class="booking-bar">
+  <div>
+    <div class="bb-label">Your selection</div>
+    <div class="bb-value">₹998 <span style="font-size:var(--fs-xs);color:var(--ink-400);font-weight:600;">· 2 experiences</span></div>
+  </div>
+  <button class="btn btn-primary">Continue booking <i class="fa-solid fa-arrow-right"></i></button>
+</div>
+
+<script src="app.js"></script>
+<script>
+const T = window.Travel;
+
+/* top nav only — this page owns its bottom bar */
+document.body.insertAdjacentHTML("afterbegin", T.topNav("tours", { searchBox: true }));
+T.wireTopSearch();
+T.wireSearchIcon();
+
+/* page search */
+document.getElementById("xSearch").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    const v = e.target.value.trim();
+    if (v) window.location.href = `search.html?query=${encodeURIComponent(v)}`;
+  }
+});
+
+/* ---------- API-driven random experiences ---------- */
+const POOL_CATS = ["Boat", "Temple", "Museum", "Heritage", "Nature"];
+const STOP = new Set(["tourism", "travel", "india", "photography", "culture", "experience", "explore", "destination", "place", "visit", "tourist attraction", "heritage tourism"]);
+const CAT_ICONS = [["temple", "🛕"], ["boat", "🚤"], ["museum", "🏛️"], ["heritage", "🏰"], ["nature", "🌿"], ["park", "🌳"], ["bridge", "🌉"], ["church", "⛪"], ["garden", "🌷"], ["airport", "✈️"], ["library", "📚"], ["school", "🏫"]];
+const iconFor = (t) => { const l = t.toLowerCase(); const m = CAT_ICONS.find(([k]) => l.includes(k)); return m ? m[1] : "📍"; };
+
+let ALL = [];
+
+async function loadPool() {
+  const lists = await Promise.all(POOL_CATS.map((c) => T.fetchList(c, 1).catch(() => [])));
+  const map = new Map();
+  lists.flat().forEach((i) => map.set(String(i.id), i));
+  ALL = Array.from(map.values());
+  if (!ALL.length) {
+    document.getElementById("featuredWrap").innerHTML =
+      `<div class="state-box" style="grid-column:1/-1;min-height:200px;"><div class="state-ico"><i class="fa-solid fa-cloud-bolt"></i></div><p>Couldn't reach the experiences database.</p></div>`;
+    return;
+  }
+  render();
+}
+
+function renderFeatured() {
+  const item = ALL[Math.floor(Math.random() * ALL.length)];
+  const { rating, reviews } = T.ratingFor(item.id);
+  const price = T.fmtPrice(item.ticket_prices && item.ticket_prices.indian);
+  document.getElementById("featuredWrap").innerHTML = `
+    <div class="fx-media">
+      <img src="${T.esc(item.thumbnail)}" alt="${T.esc(item.title)}" onerror="this.onerror=null;this.src='${T.FALLBACK_IMG}';">
+    </div>
+    <div class="fx-body">
+      <span class="x-badge" style="position:static;"><i class="fa-solid fa-crown"></i> Traveller favourite</span>
+      <h2 class="h2">${T.esc(item.title)}</h2>
+      <p class="muted" style="font-size:var(--fs-sm);">${T.esc(T.excerpt(item.description, 150))}</p>
+      <div class="stars-line"><i class="fa-solid fa-star"></i> ${rating} <span class="muted">· ${reviews.toLocaleString("en-IN")} reviews · ${T.esc(T.shortLoc(item))}</span></div>
+      <div class="d-flex" style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px;width:100%;margin-top:6px;">
+        <div class="x-price"><small>Starting from</small>${price}</div>
+        <button class="btn btn-primary book-featured" data-title="${T.esc(item.title)}" data-price="${price}">Book now <i class="fa-solid fa-arrow-right"></i></button>
+      </div>
+    </div>`;
+  updateBar(item.title, price);
+}
+
+function renderTours() {
+  const picks = T.shuffle(ALL).slice(0, 8);
+  document.getElementById("tourRail").innerHTML = picks.map((item) => {
+    const { rating } = T.ratingFor(item.id);
+    const price = T.fmtPrice(item.ticket_prices && item.ticket_prices.indian);
+    return `
+    <a class="x-card tour-mini" href="details.html?id=${encodeURIComponent(item.id)}">
+      <div class="x-media">
+        <img src="${T.esc(item.thumbnail)}" alt="${T.esc(item.title)}" loading="lazy" onerror="this.onerror=null;this.src='${T.FALLBACK_IMG}';">
+        <span class="x-badge">⭐ ${rating}</span>
+      </div>
+      <div class="x-body">
+        <h3 class="h3" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${T.esc(item.title)}</h3>
+        <p class="muted" style="font-size:var(--fs-xs);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><i class="fa-solid fa-location-dot" style="color:#e5484d;"></i> ${T.esc(T.shortLoc(item))}</p>
+        <div class="x-price" style="font-size:1.05rem;">${price}</div>
+      </div>
+    </a>`;
+  }).join("");
+}
+
+function renderCats() {
+  const freq = {};
+  ALL.forEach((item) => T.tagsOf(item).forEach((t) => {
+    const k = t.toLowerCase().replace(/\s+/g, " ");
+    if (!STOP.has(k) && !STOP.has(k.replace(/s$/, ""))) freq[t] = (freq[t] || 0) + 1;
+  }));
+  const top = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 4);
+  document.getElementById("catGrid").innerHTML = top.length ? top.map(([cat, n]) => `
+    <a class="cat-card" href="all.html?category=${encodeURIComponent(cat)}">
+      <div class="cat-ico">${iconFor(cat)}</div><b>${T.esc(cat)}</b><small>${n} activities</small>
+    </a>`).join("") : `<div class="state-box" style="grid-column:1/-1;"><p>No categories found.</p></div>`;
+}
+
+function render() {
+  renderFeatured();
+  renderTours();
+  renderCats();
+  document.querySelectorAll("section.section").forEach((el) => el.classList.add("reveal"));
+  T.initReveal();
+}
+
+document.getElementById("shuffleBtn").addEventListener("click", render);
+loadPool();
+
+/* ---------- booking bar ---------- */
+const barValue = document.querySelector(".bb-value");
+const barLabel = document.querySelector(".bb-label");
+function updateBar(title, price) {
+  const short = title.length > 24 ? title.slice(0, 24) + "…" : title;
+  barLabel.textContent = "Your pick";
+  barValue.innerHTML = `${price} <span style="font-size:var(--fs-xs);color:var(--ink-400);font-weight:600;">· ${T.esc(short)}</span>`;
+}
+document.addEventListener("click", (e) => {
+  const b = e.target.closest(".book-featured");
+  if (b) updateBar(b.dataset.title, b.dataset.price);
+});
+</script>
+</body>
+</html>

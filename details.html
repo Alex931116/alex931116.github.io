@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Travella — Destination</title>
+<meta name="description" content="Live entry fees, opening hours, maps and galleries for Indian destinations.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+<link href="styles.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+  .details-wrap { padding-top: clamp(16px, 3.5vw, 30px); }
+
+  .title-block { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin: clamp(18px, 3vw, 26px) 0 16px; }
+  .title-block h1 { font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2.3rem); font-weight: 800; letter-spacing: -0.025em; }
+  .title-block .loc-line { display: flex; align-items: center; gap: 6px; color: var(--ink-500); font-size: var(--fs-sm); font-weight: 500; margin-top: 6px; }
+  .title-block .loc-line i { color: #e5484d; }
+  .share-round { flex: none; }
+
+  .rating-line { display: flex; align-items: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .tag-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .tag-chips .chip { padding: 6px 13px; font-size: 0.74rem; }
+
+  .details-layout { gap: clamp(18px, 3vw, 30px); }
+  .detail-card + .detail-card { margin-top: clamp(16px, 2.6vw, 22px); }
+  .detail-card h3 { font-size: var(--fs-h3); font-weight: 800; margin-bottom: 14px; display: flex; align-items: center; gap: 9px; }
+  .detail-card h3 i { color: var(--brand-500); font-size: 0.95em; }
+
+  .about-text { font-size: var(--fs-body); color: var(--ink-700); line-height: 1.7; }
+  .about-text p { margin-bottom: 12px; }
+  .about-text h2, .about-text h3 { margin: 18px 0 8px; font-size: 1.05rem; font-weight: 800; color: var(--ink-900); }
+  .about-text ul, .about-text ol { padding-left: 20px; margin-bottom: 12px; }
+  .about-text li { margin-bottom: 5px; }
+  .about-text strong { color: var(--ink-900); }
+
+  .side-cta { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+  .btn-map, .btn-web { width: 100%; justify-content: flex-start; }
+
+  .nearby-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); }
+  .ncard { container-type: inline-size; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sm); overflow: hidden; box-shadow: var(--sh-xs); transition: transform .25s var(--ease), box-shadow .25s var(--ease); }
+  .ncard:hover { transform: translateY(-3px); box-shadow: var(--sh-md); }
+  .ncard img { width: 100%; aspect-ratio: 3/2; object-fit: cover; }
+  .ncard .nbody { padding: 10px 12px 12px; }
+  .ncard .ntitle { font-size: var(--fs-sm); font-weight: 700; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+</style>
+</head>
+<body>
+
+<main class="container details-wrap">
+
+  <!-- Hero gallery (sliding carousel, images + video) -->
+  <div class="details-top anim-in">
+    <div id="heroCarousel" class="carousel-fill"></div>
+    <a class="back-float" href="javascript:history.length>1?history.back():location.href='index.html'" aria-label="Back"><i class="fa-solid fa-arrow-left"></i></a>
+    <button class="share-float" id="shareBtn" aria-label="Share"><i class="fa-solid fa-share-nodes"></i></button>
+  </div>
+
+  <!-- Title -->
+  <div class="title-block">
+    <div>
+      <h1 id="placeTitle">Loading…</h1>
+      <div class="loc-line"><i class="fa-solid fa-location-dot"></i><span id="placeLocation"></span></div>
+      <div class="rating-line" id="ratingLine"></div>
+      <div class="tag-chips" id="tagChips"></div>
+    </div>
+  </div>
+
+  <!-- Metrics -->
+  <div class="metric-grid">
+    <div class="metric anim-up"><b id="mOpen">—</b><span>Open</span></div>
+    <div class="metric anim-up delay-1"><b id="mEntry">—</b><span>Entry</span></div>
+    <div class="metric anim-up delay-2"><b id="mDays">—</b><span>Days</span></div>
+  </div>
+
+  <!-- Main layout -->
+  <div class="details-layout" style="margin-top:clamp(20px,3.5vw,30px);">
+
+    <!-- Main column -->
+    <div>
+      <div class="detail-card">
+        <h3><i class="fa-solid fa-book-open"></i> About</h3>
+        <div class="about-text" id="aboutText"></div>
+      </div>
+
+      <div class="detail-card">
+        <h3><i class="fa-regular fa-clock"></i> Opening hours</h3>
+        <div id="hoursList"></div>
+      </div>
+
+      <div class="detail-card">
+        <h3><i class="fa-regular fa-images"></i> Gallery</h3>
+        <div class="gallery-rail" id="galleryRail"></div>
+      </div>
+
+      <div class="detail-card">
+        <h3><i class="fa-solid fa-location-crosshairs"></i> Nearby attractions</h3>
+        <div class="nearby-grid" id="nearbyGrid"></div>
+      </div>
+    </div>
+
+    <!-- Side column (sticky on desktop) -->
+    <aside class="details-side">
+      <div class="detail-card">
+        <h3><i class="fa-solid fa-ticket"></i> Ticket prices</h3>
+        <div class="price-row"><span class="who">Indian</span><span class="how" id="pIndian">—</span></div>
+        <div class="price-row"><span class="who">Foreigner</span><span class="how" id="pForeigner">—</span></div>
+        <div class="price-row"><span class="who">Child</span><span class="how" id="pChild">—</span></div>
+      </div>
+
+      <div class="detail-card">
+        <h3><i class="fa-regular fa-sun"></i> Best time to visit</h3>
+        <p class="about-text" id="bestTime" style="margin:0;">—</p>
+      </div>
+
+      <div class="detail-card">
+        <h3><i class="fa-solid fa-shield-halved"></i> Facilities</h3>
+        <div class="fac-list" id="facilitiesList"></div>
+      </div>
+
+      <div class="detail-card">
+        <h3><i class="fa-solid fa-route"></i> Getting there</h3>
+        <a class="btn btn-primary btn-map" id="mapBtn" target="_blank" rel="noopener"><i class="fa-solid fa-map-location-dot"></i> Open live route map</a>
+        <a class="btn btn-ghost btn-web" id="webBtn" target="_blank" rel="noopener"><i class="fa-solid fa-globe"></i> Official website</a>
+        <div class="side-cta">
+          <button class="btn btn-dark" id="planBtn"><i class="fa-solid fa-route"></i> Plan my visit</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<!-- Mobile sticky CTA -->
+<div class="cta-bar-mobile" id="ctaBar" hidden>
+  <div>
+    <div class="fee-label">Entry fee</div>
+    <div class="fee-value" id="ctaPrice">—</div>
+  </div>
+  <button class="btn btn-primary" id="planBtnMobile"><i class="fa-solid fa-map-location-dot"></i> Plan visit</button>
+</div>
+
+<script src="app.js"></script>
+<script>
+const T = window.Travel;
+const id = new URLSearchParams(location.search).get("id");
+let heroCarousel = null;
+
+async function load() {
+  if (!id) { document.body.innerHTML = `<div class="state-box" style="min-height:80vh;"><div class="state-ico"><i class="fa-solid fa-link-slash"></i></div><h3>Missing destination id</h3></div>`; return; }
+
+  const data = await T.fetchPlace(id);
+
+  document.title = `${T.shortTitle(data.title)} — Travella`;
+  document.getElementById("placeTitle").textContent = data.title || "Destination";
+  document.getElementById("placeLocation").textContent = data.location || "Location not listed";
+
+  /* rating line */
+  const { rating, reviews } = T.ratingFor(id);
+  document.getElementById("ratingLine").innerHTML = `
+    <span class="rating-num" style="font-size:1rem;">${rating}</span>
+    ${T.dotsHtml(rating)}
+    <span class="revs">${reviews.toLocaleString("en-IN")} reviews</span>`;
+
+  /* tag chips */
+  const tags = T.tagsOf(data).slice(0, 6);
+  document.getElementById("tagChips").innerHTML = tags
+    .map((t) => `<a class="chip" href="search.html?query=${encodeURIComponent(t)}">${T.esc(t)}</a>`).join("");
+
+  /* metrics */
+  document.getElementById("mOpen").textContent = T.timeRange(data.opening_time, data.closing_time).split("—")[0].trim() || "24h";
+  document.getElementById("mEntry").textContent = T.fmtPrice(data.ticket_prices?.indian);
+  document.getElementById("mDays").textContent = T.daysCount(data) || "Open";
+  document.getElementById("ctaPrice").textContent = T.fmtPrice(data.ticket_prices?.indian);
+
+  /* about */
+  document.getElementById("aboutText").innerHTML = marked.parse(data.description || "No description available yet.");
+  document.getElementById("bestTime").textContent = data.best_time_to_visit || "Any season works!";
+
+  /* hours */
+  const days = data.opening_days || [];
+  const range = T.timeRange(data.opening_time, data.closing_time);
+  const todayName = new Date().toLocaleDateString("en-US", { weekday: "long" });
+  document.getElementById("hoursList").innerHTML = days.length
+    ? days.map((d) => `
+        <div class="hour-row">
+          <span class="day">${T.esc(d)} ${d === todayName ? '<span class="today">Today</span>' : ""}</span>
+          <span class="time">${range}</span>
+        </div>`).join("")
+    : `<p class="muted" style="font-size:var(--fs-sm);">No operational hours listed.</p>`;
+
+  /* prices */
+  document.getElementById("pIndian").textContent = T.fmtPrice(data.ticket_prices?.indian);
+  document.getElementById("pForeigner").textContent = T.fmtPrice(data.ticket_prices?.foreigner);
+  document.getElementById("pChild").textContent = T.fmtPrice(data.ticket_prices?.child);
+
+  /* facilities */
+  const facs = data.facilities || [];
+  document.getElementById("facilitiesList").innerHTML = facs.length
+    ? facs.map((f) => `<span class="fac-chip"><i class="fa-solid fa-circle-check"></i>${T.esc(f)}</span>`).join("")
+    : `<p class="muted" style="font-size:var(--fs-sm);">General amenities included.</p>`;
+
+  /* links */
+  const mapUrl = data.map_url || "https://www.google.com/maps/search/" + encodeURIComponent(data.location || data.title);
+  const webUrl = data.official_website || "#";
+  document.getElementById("mapBtn").href = mapUrl;
+  document.getElementById("webBtn").href = webUrl;
+  document.getElementById("planBtn").onclick = () => window.open(mapUrl, "_blank");
+  document.getElementById("planBtnMobile").onclick = () => window.open(mapUrl, "_blank");
+  document.getElementById("ctaBar").hidden = false;
+
+  /* images + videos: sliding hero carousel, clickable gallery rail */
+  const imgs = T.imagesOf(data, 10);
+  heroCarousel = T.createCarousel(document.getElementById("heroCarousel"), imgs.map(T.slideOf), {
+    counter: true, counterPos: "bottom-right", dots: true, interval: 4500,
+  });
+  window.__heroGo = (i) => heroCarousel && heroCarousel.goTo(i);
+  document.getElementById("galleryRail").innerHTML = imgs
+    .map((src, i) => T.isVideoUrl(src)
+      ? `<div class="g-thumb" role="button" aria-label="Play video" onclick="window.__heroGo(${i})"><i class="fa-solid fa-circle-play"></i></div>`
+      : `<img src="${T.esc(src)}" loading="lazy" role="button" aria-label="Open slide ${i + 1}" onclick="window.__heroGo(${i})" onerror="this.onerror=null;this.src='${T.FALLBACK_IMG}';"></img>`)
+    .join("");
+
+  /* nearby */
+  let locQuery = "Prayagraj";
+  const loc = (data.location || "").trim();
+  if (loc) {
+    const parts = loc.split(",").map((s) => s.trim()).filter(Boolean);
+    locQuery = parts.length >= 2 ? parts[parts.length - 2] : parts[0];
+  } else if (tags.length) {
+    locQuery = tags[0];
+  }
+  const grid = document.getElementById("nearbyGrid");
+  grid.innerHTML = Array.from({ length: 3 }, () =>
+    `<div class="ncard"><div class="sk" style="aspect-ratio:3/2;"></div><div class="nbody"><div class="sk" style="height:10px;width:80%;"></div></div></div>`).join("");
+  try {
+    const nearby = await T.fetchList(locQuery, 1);
+    const others = nearby.filter((x) => String(x.id) !== String(id)).slice(0, 8);
+    grid.innerHTML = others.length
+      ? others.map((x) => `
+          <a class="ncard" href="details.html?id=${encodeURIComponent(x.id)}">
+            <img src="${T.esc(x.thumbnail)}" loading="lazy" onerror="this.onerror=null;this.src='${T.FALLBACK_IMG}';">
+            <div class="nbody">
+              <div class="ntitle">${T.esc(x.title)}</div>
+              <div class="dloc" style="margin-top:6px;"><i class="fa-solid fa-location-dot"></i>${T.esc(T.shortLoc(x))}</div>
+            </div>
+          </a>`).join("")
+      : `<p class="muted" style="font-size:var(--fs-sm);grid-column:1/-1;">No nearby spots found.</p>`;
+  } catch (e) {
+    console.error(e);
+    grid.innerHTML = `<p class="muted" style="font-size:var(--fs-sm);grid-column:1/-1;">Couldn't load nearby places.</p>`;
+  }
+
+  /* share */
+  document.getElementById("shareBtn").onclick = () => {
+    if (navigator.share) navigator.share({ title: data.title, url: location.href });
+    else window.prompt("Copy link:", location.href);
+  };
+}
+
+load().catch((e) => {
+  console.error(e);
+  document.getElementById("placeTitle").textContent = "Couldn't load this place";
+});
+
+T.renderShell("explore", { back: true });
+</script>
+</body>
+</html>

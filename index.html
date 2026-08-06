@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Travella — Discover India</title>
+<meta name="description" content="Handpicked temples, ghats, museums and wonders across India — rated by real travellers.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+<link href="styles.css" rel="stylesheet">
+<style>
+  /* Home-specific layout */
+  .home-hero { display: grid; gap: clamp(22px, 4vw, 40px); padding-top: clamp(20px, 5vw, 56px); }
+  .home-hero .eyebrow { margin-bottom: 14px; }
+  .home-hero .hero-copy h1 { margin-bottom: 14px; }
+  .home-hero .hero-copy > p { max-width: 460px; margin-bottom: 22px; }
+  .quick-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .hero-card .hero-big { max-width: 480px; }
+  .hero-card .btn { margin-top: clamp(20px, 3vw, 28px); }
+
+  @media (min-width: 900px) {
+    .home-hero { grid-template-columns: 1.05fr 0.95fr; align-items: center; }
+    .hero-card { border-radius: var(--r-xl); }
+  }
+</style>
+</head>
+<body>
+
+<main>
+  <!-- ================= HERO ================= -->
+  <section class="container home-hero">
+    <div class="hero-copy anim-up">
+      <span class="eyebrow"><i class="fa-solid fa-location-dot"></i> Curated for Indian travellers</span>
+      <h1 class="hero-title">Where do you want<br>to go?</h1>
+      <p class="muted">Handpicked temples, ghats, museums and hidden wonders — rated by real travellers, verified daily.</p>
+
+      <form class="search-pill" onsubmit="return goSearch(event)">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input id="homeSearch" type="search" placeholder="Search destination, city or state…" autocomplete="off">
+        <button class="go" type="submit" aria-label="Search"><i class="fa-solid fa-arrow-right"></i></button>
+      </form>
+
+      <div class="quick-chips">
+        <a class="chip" href="search.html?query=Temple"><i class="fa-solid fa-kaaba"></i> Temples</a>
+        <a class="chip" href="search.html?query=Boat"><i class="fa-solid fa-sailboat"></i> Boat Rides</a>
+        <a class="chip" href="search.html?query=Heritage"><i class="fa-solid fa-landmark"></i> Heritage</a>
+        <a class="chip" href="search.html?query=Museum"><i class="fa-solid fa-building-columns"></i> Museums</a>
+      </div>
+    </div>
+
+    <div class="hero-card anim-up delay-1">
+      <span class="eyebrow" style="color:var(--sun-500)"><i class="fa-solid fa-sparkles"></i> This season</span>
+      <div class="hero-big" style="margin-top:10px;">Plan your next trip in under a minute</div>
+      <p style="color:rgba(255,255,255,.78);font-size:var(--fs-sm);margin-top:10px;max-width:440px;">
+        Live entry fees, opening hours, maps and galleries for 250+ destinations across India.
+      </p>
+      <div class="hero-stats">
+        <div class="hero-stat"><b>250+</b><span>Destinations</span></div>
+        <div class="hero-stat"><b>4.8★</b><span>Avg rating</span></div>
+        <div class="hero-stat"><b>12K+</b><span>Explorers</span></div>
+      </div>
+      <a href="all.html" class="btn btn-dark" style="background:#fff;color:var(--ink-900);">
+        Explore destinations <i class="fa-solid fa-arrow-right"></i>
+      </a>
+    </div>
+  </section>
+
+  <!-- ================= POPULAR ================= -->
+  <section class="container section">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Most loved</span>
+        <h2 class="h2" style="margin-top:6px;">Popular travel</h2>
+      </div>
+      <a class="view-all" href="search.html?query=Prayagraj">View all <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+    <div class="rail" id="popularRail"></div>
+  </section>
+
+  <!-- ================= TRENDING ================= -->
+  <section class="container section">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow" style="color:var(--sun-600)"><i class="fa-solid fa-fire"></i> On the rise</span>
+        <h2 class="h2" style="margin-top:6px;">Trending travel</h2>
+      </div>
+      <a class="view-all" href="all.html?category=Mumbai">View all <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+    <div class="rail" id="mumbaiRail"></div>
+  </section>
+
+  <!-- ================= NEARBY ================= -->
+  <section class="container section">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow"><i class="fa-solid fa-location-crosshairs"></i> Around you</span>
+        <h2 class="h2" style="margin-top:6px;">Nearby travel</h2>
+      </div>
+      <button class="view-all" id="retryNearby" style="background:none;" hidden><i class="fa-solid fa-rotate-right"></i></button>
+    </div>
+    <div class="rail" id="nearbyRail"></div>
+  </section>
+
+  <!-- ================= RECENT COLLECTION ================= -->
+  <section class="container section">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Fresh picks</span>
+        <h2 class="h2" style="margin-top:6px;">Recent collection</h2>
+      </div>
+      <a class="view-all" href="all.html">View all <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+    <div class="grid grid--wide" id="recentGrid"></div>
+  </section>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="footer">
+    <div class="container">
+      <div class="brand">
+        <span class="brand-logo"><i class="fa-solid fa-compass"></i></span>
+        <span>Travella</span>
+      </div>
+      <p>Beautiful, useful travel discovery for India — built mobile-first, expanded for desktop.</p>
+      <div class="foot-links">
+        <a href="index.html">Home</a>
+        <a href="search.html?query=Uttar%20Pradesh">Explore</a>
+        <a href="page2.html">Tours &amp; Experiences</a>
+        <a href="all.html">All destinations</a>
+      </div>
+    </div>
+  </footer>
+</main>
+
+<script src="app.js"></script>
+<script>
+  function goSearch(e) {
+    const v = document.getElementById("homeSearch").value.trim();
+    if (v) window.location.href = `search.html?query=${encodeURIComponent(v)}`;
+    return false;
+  }
+
+  const T = window.Travel;
+  const loadIntoRail = (railId, promise) => {
+    const rail = document.getElementById(railId);
+    rail.innerHTML = T.skCards(6);
+    promise
+      .then((items) => {
+        rail.innerHTML = items.length
+          ? items.map(T.cardHTML).join("")
+          : `<p class="muted" style="padding:10px 4px;">Nothing here yet — check back soon.</p>`;
+      })
+      .catch((e) => {
+        console.error(e);
+        rail.innerHTML = `<div class="state-box"><div class="state-ico"><i class="fa-solid fa-cloud-bolt"></i></div><p>Couldn't load this section.</p></div>`;
+      });
+  };
+
+  /* Popular — Prayagraj bucket */
+  loadIntoRail("popularRail", T.fetchList("prayagraj", 1));
+
+  /* Trending — Mumbai bucket */
+  loadIntoRail("mumbaiRail", T.fetchList("Mumbai", 1));
+
+  /* Nearby — geolocation → reverse geocode state → list */
+  const nearbyRail = document.getElementById("nearbyRail");
+  function loadNearby() {
+    document.getElementById("retryNearby").hidden = true;
+    nearbyRail.innerHTML = T.skCards(6);
+    if (!("geolocation" in navigator)) {
+      nearbyRail.innerHTML = `<p class="muted" style="padding:10px 4px;">Location not supported on this device.</p>`;
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const geoRes = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`
+          );
+          const geo = await geoRes.json();
+          const state = geo.address?.state || "Uttar Pradesh";
+          const items = await T.fetchList(state, 1);
+          nearbyRail.innerHTML = items.length
+            ? items.map(T.cardHTML).join("")
+            : `<p class="muted" style="padding:10px 4px;">No destinations tagged near <b>${T.esc(state)}</b> yet.</p>`;
+        } catch (e) {
+          console.error(e);
+          nearbyRail.innerHTML = `<div class="state-box"><div class="state-ico"><i class="fa-solid fa-location-crosshairs"></i></div><p>Couldn't find nearby spots.</p></div>`;
+          document.getElementById("retryNearby").hidden = false;
+        }
+      },
+      () => {
+        nearbyRail.innerHTML = `<div class="state-box"><div class="state-ico"><i class="fa-solid fa-ban"></i></div><p>Location permission denied. <br>Allow access to see nearby places.</p></div>`;
+        document.getElementById("retryNearby").hidden = false;
+      },
+      { timeout: 8000 }
+    );
+  }
+  loadNearby();
+  document.getElementById("retryNearby").addEventListener("click", loadNearby);
+
+  /* Recent collection */
+  (async () => {
+    const grid = document.getElementById("recentGrid");
+    grid.innerHTML = T.skRows(6);
+    try {
+      const res = await fetch(`${T.API}/sundarikanya?tag=&page=1`);
+      const json = await res.json();
+      const items = json.data || [];
+      grid.innerHTML = items.length ? items.map(T.rowHTML).join("") : "";
+    } catch (e) {
+      console.error(e);
+      grid.innerHTML = `<div class="state-box"><div class="state-ico"><i class="fa-solid fa-cloud-bolt"></i></div><p>Couldn't load the collection.</p></div>`;
+    }
+  })();
+
+  /* Reveal-on-scroll */
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".section").forEach((el, i) => {
+      el.classList.add("reveal");
+    });
+    T.initReveal();
+  });
+
+  T.renderShell("home");
+</script>
+</body>
+</html>
