@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Travella — My Profile</title>
-<meta name="description" content="Your Travella profile — name, mobile number and email.">
+<meta name="description" content="Your Travella profile — sign in, add your name and mobile number.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://tourandtravels-nine.vercel.app" crossorigin>
@@ -17,26 +17,54 @@
 <main class="container profile-wrap">
   <span class="eyebrow" style="display:inline-flex;margin-bottom:10px;"><i class="fa-solid fa-circle-user"></i> Account</span>
   <h1 class="h1" style="margin-bottom:4px;">My profile</h1>
-  <p class="muted" style="margin-bottom:clamp(18px,3vw,28px);">Name and mobile are required — email is optional.</p>
+  <p class="muted" style="margin-bottom:clamp(18px,3vw,28px);">Sign in, then add your name and mobile — email is optional.</p>
 
   <div class="profile-card" id="profileCard">
 
-    <!-- avatar -->
-    <div class="profile-avatar" id="avatar" style="background:linear-gradient(135deg,#00a06b,#005a3c);">
-      <i class="fa-regular fa-circle-user" id="avatarIco"></i>
-      <span id="avatarText" style="display:none;"></span>
-    </div>
-    <div class="avatar-row" id="avatarRow" hidden>
-      <button class="avatar-dot sel" data-i="0" style="background:linear-gradient(135deg,#00a06b,#005a3c);" aria-label="Green avatar"></button>
-      <button class="avatar-dot" data-i="1" style="background:linear-gradient(135deg,#ff8c42,#e5484d);" aria-label="Orange avatar"></button>
-      <button class="avatar-dot" data-i="2" style="background:linear-gradient(135deg,#5b8def,#3f3f99);" aria-label="Blue avatar"></button>
-      <button class="avatar-dot" data-i="3" style="background:linear-gradient(135deg,#8e5bd0,#5b2d90);" aria-label="Purple avatar"></button>
-      <button class="avatar-dot" data-i="4" style="background:linear-gradient(135deg,#00b4a6,#0d5c5c);" aria-label="Teal avatar"></button>
-      <button class="avatar-dot" data-i="5" style="background:linear-gradient(135deg,#f0b429,#d97706);" aria-label="Amber avatar"></button>
+    <!-- ============ SIGNED OUT: Firebase auth ============ -->
+    <div class="auth-card" id="authCard">
+      <div class="profile-avatar" style="background:linear-gradient(135deg,#00a06b,#005a3c);"><i class="fa-solid fa-user-lock"></i></div>
+      <h3 class="h3" style="margin-top:4px;">Sign in to Travella</h3>
+      <p class="muted" style="font-size:var(--fs-sm);max-width:330px;">Your name, mobile and email stay with your account, so your profile follows you on every device.</p>
+
+      <button class="btn btn-dark" id="googleBtn" disabled style="width:100%;"><i class="fa-brands fa-google"></i> Continue with Google</button>
+
+      <div class="divider"><span>or use mobile</span></div>
+
+      <div class="field" id="fAuthMobile">
+        <label for="authMobile">Mobile number <span class="req">*</span></label>
+        <div class="phone-row">
+          <span class="cc">+91</span>
+          <input class="input" id="authMobile" type="tel" inputmode="numeric" placeholder="10-digit mobile number" maxlength="10">
+        </div>
+        <span class="hint">We'll send a one-time code to verify.</span>
+      </div>
+      <div id="recaptcha"></div>
+      <button class="btn btn-primary" id="otpBtn" disabled style="width:100%;"><i class="fa-solid fa-paper-plane"></i> Send code</button>
+
+      <div class="field" id="otpStep" hidden>
+        <label for="otpCode">Verification code</label>
+        <input class="input" id="otpCode" type="tel" inputmode="numeric" placeholder="6-digit code" maxlength="6">
+        <span class="hint">Enter the 6-digit code sent to your mobile.</span>
+      </div>
+      <button class="btn btn-ghost" id="verifyBtn" hidden style="width:100%;"><i class="fa-solid fa-check"></i> Verify &amp; continue</button>
     </div>
 
-    <!-- form -->
-    <form class="profile-form" id="profileForm">
+    <!-- ============ SIGNED IN: edit form ============ -->
+    <form class="profile-form" id="profileForm" hidden>
+      <div class="profile-avatar" id="avatar" style="background:linear-gradient(135deg,#00a06b,#005a3c);">
+        <i class="fa-regular fa-circle-user" id="avatarIco"></i>
+        <span id="avatarText" style="display:none;"></span>
+      </div>
+      <div class="avatar-row">
+        <button type="button" class="avatar-dot sel" data-i="0" style="background:linear-gradient(135deg,#00a06b,#005a3c);" aria-label="Green avatar"></button>
+        <button type="button" class="avatar-dot" data-i="1" style="background:linear-gradient(135deg,#ff8c42,#e5484d);" aria-label="Orange avatar"></button>
+        <button type="button" class="avatar-dot" data-i="2" style="background:linear-gradient(135deg,#5b8def,#3f3f99);" aria-label="Blue avatar"></button>
+        <button type="button" class="avatar-dot" data-i="3" style="background:linear-gradient(135deg,#8e5bd0,#5b2d90);" aria-label="Purple avatar"></button>
+        <button type="button" class="avatar-dot" data-i="4" style="background:linear-gradient(135deg,#00b4a6,#0d5c5c);" aria-label="Teal avatar"></button>
+        <button type="button" class="avatar-dot" data-i="5" style="background:linear-gradient(135deg,#f0b429,#d97706);" aria-label="Amber avatar"></button>
+      </div>
+
       <div class="field" id="fName">
         <label for="inName">Full name <span class="req">*</span></label>
         <input class="input" id="inName" type="text" placeholder="e.g. Aarav Sharma" autocomplete="name" maxlength="60">
@@ -55,17 +83,21 @@
         <span class="hint">We'll never share your details.</span>
       </div>
 
+      <div class="signed-line"><i class="fa-solid fa-circle-check"></i> Signed in as <b id="signedAs">…</b></div>
+
       <button class="btn btn-primary" type="submit" style="width:100%;"><i class="fa-solid fa-floppy-disk"></i> Save profile</button>
-      <p class="muted" style="font-size:var(--fs-xs);text-align:center;margin:0;">Profile sync activates once the server API is ready — for now it's stored on this device.</p>
+      <button class="btn btn-ghost" type="button" id="signOutBtn" style="width:100%;"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sign out</button>
     </form>
 
-    <!-- saved state -->
+    <!-- ============ SAVED ============ -->
     <div class="profile-ok" id="profileOk">
       <div style="font-size:var(--fs-sm);color:var(--ink-500);"><i class="fa-solid fa-circle-check" style="color:var(--brand-500);"></i> Profile saved</div>
       <div class="ok-row"><i class="fa-solid fa-user"></i><div><b id="okName"></b><span>Name</span></div></div>
       <div class="ok-row"><i class="fa-solid fa-mobile-screen"></i><div><b id="okMobile"></b><span>Mobile number</span></div></div>
       <div class="ok-row" id="okEmailRow"><i class="fa-solid fa-envelope"></i><div><b id="okEmail"></b><span>Email</span></div></div>
+      <div class="signed-line"><i class="fa-solid fa-circle-check"></i> Signed in as <b id="okSignedAs">…</b></div>
       <button class="btn btn-ghost" id="editBtn" style="width:100%;"><i class="fa-solid fa-pen"></i> Edit profile</button>
+      <button class="btn btn-ghost" id="signOutBtn2" style="width:100%;"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sign out</button>
     </div>
 
   </div>
@@ -78,6 +110,19 @@
 <script>
 const T = window.Travel;
 
+/* ---------- Firebase (CDN modules — same SDK version as your snippet) ---------- */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAET8iPctXTXcPhTu4CtMLxZAZ-AXBZg2o",
+  authDomain: "vannilatravels-7e104.firebaseapp.com",
+  projectId: "vannilatravels-7e104",
+  storageBucket: "vannilatravels-7e104.firebasestorage.app",
+  messagingSenderId: "455786245355",
+  appId: "1:455786245355:web:122f64340e39f6e94762ae",
+};
+const SDK = "https://www.gstatic.com/firebasejs/12.17.1";
+
+let auth = null, authMod = null, authUser = null, otpConfirmation = null, fbReady = false;
+
 const GRADS = [
   "linear-gradient(135deg,#00a06b,#005a3c)",
   "linear-gradient(135deg,#ff8c42,#e5484d)",
@@ -89,10 +134,20 @@ const GRADS = [
 
 const $ = (s) => document.querySelector(s);
 const avatar = $("#avatar"), avatarText = $("#avatarText"), avatarIco = $("#avatarIco");
-const form = $("#profileForm"), ok = $("#profileOk"), avatarRow = $("#avatarRow");
+const form = $("#profileForm"), ok = $("#profileOk"), authCard = $("#authCard");
 
-let state = { name: "", mobile: "", email: "", avatar: 0 };
+let state = { name: "", mobile: "", email: "", avatar: 0, uid: "" };
 
+/* ---------- toast ---------- */
+function showToast(msg) {
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(t._h);
+  t._h = setTimeout(() => t.classList.remove("show"), 2800);
+}
+
+/* ---------- UI helpers ---------- */
 function initials(name) {
   return String(name || "").trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join("").toUpperCase() || "?";
 }
@@ -102,43 +157,140 @@ function paintAvatar() {
   else { avatarText.style.display = "none"; avatarIco.style.display = ""; }
   document.querySelectorAll(".avatar-dot").forEach((d) => d.classList.toggle("sel", Number(d.dataset.i) === state.avatar));
 }
-function showToast(msg) {
-  const t = $("#toast");
-  t.textContent = msg;
-  t.classList.add("show");
-  clearTimeout(t._h);
-  t._h = setTimeout(() => t.classList.remove("show"), 2400);
-}
-
-function showForm() {
-  form.style.display = ""; ok.classList.remove("show"); avatarRow.hidden = false;
-}
-function showSaved() {
-  form.style.display = "none"; ok.classList.add("show"); avatarRow.hidden = true;
-  $("#okName").textContent = state.name;
-  $("#okMobile").textContent = "+91 " + state.mobile;
-  if (state.email) { $("#okEmail").textContent = state.email; $("#okEmailRow").style.display = ""; }
-  else $("#okEmailRow").style.display = "none";
-  paintAvatar();
-}
-
-/* avatar picker */
-avatarRow.addEventListener("click", (e) => {
-  const b = e.target.closest(".avatar-dot");
-  if (!b) return;
-  state.avatar = Number(b.dataset.i);
-  paintAvatar();
-});
-
-/* validation */
 const setErr = (id, on, msg) => {
   const f = $(id);
   f.classList.toggle("err", on);
   if (on) f.querySelector(".hint").textContent = msg;
   else if (id === "#fName") f.querySelector(".hint").textContent = "Required";
   else if (id === "#fMobile") f.querySelector(".hint").textContent = "Required · 10 digits, Indian mobile";
+  else if (id === "#fAuthMobile") f.querySelector(".hint").textContent = "We'll send a one-time code to verify.";
   else f.querySelector(".hint").textContent = "We'll never share your details.";
 };
+
+function showForm() {
+  authCard.hidden = true; form.hidden = false; ok.classList.remove("show");
+  $("#signedAs").textContent = authUser.email || authUser.phoneNumber || authUser.displayName || "Travella user";
+  $("#inName").value = state.name;
+  $("#inMobile").value = state.mobile;
+  $("#inEmail").value = state.email || "";
+  paintAvatar();
+}
+function showSaved() {
+  authCard.hidden = true; form.hidden = true; ok.classList.add("show");
+  $("#okName").textContent = state.name;
+  $("#okMobile").textContent = "+91 " + state.mobile;
+  if (state.email) { $("#okEmail").textContent = state.email; $("#okEmailRow").style.display = ""; }
+  else $("#okEmailRow").style.display = "none";
+  $("#okSignedAs").textContent = authUser.email || authUser.phoneNumber || "Travella user";
+  paintAvatar();
+}
+function showAuth() {
+  authCard.hidden = false; form.hidden = true; ok.classList.remove("show");
+}
+
+/* ---------- auth state ---------- */
+function onSignedIn(user) {
+  authUser = user;
+  state.uid = user.uid;
+  if (!state.name) state.name = user.displayName || "";
+  if (!state.mobile) state.mobile = String(user.phoneNumber || "").replace(/^\+91/, "");
+  if (!state.email) state.email = user.email || "";
+  T.profileAPI.get(user.uid).then((p) => {
+    if (p && p.name && p.mobile) { state = Object.assign(state, p); showSaved(); }
+    else showForm();
+  }).catch(() => showForm());
+}
+function onSignedOut() {
+  authUser = null; otpConfirmation = null;
+  state = { name: "", mobile: "", email: "", avatar: 0, uid: "" };
+  $("#authMobile").value = ""; $("#otpCode").value = "";
+  $("#otpStep").hidden = true; $("#verifyBtn").hidden = true;
+  const otp = $("#otpBtn");
+  otp.disabled = !fbReady; otp.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send code';
+  showAuth();
+}
+
+/* ---------- Firebase bootstrap ---------- */
+(async () => {
+  try {
+    const appMod = await import(SDK + "/firebase-app.js");
+    authMod = await import(SDK + "/firebase-auth.js");
+    const app = appMod.initializeApp(FIREBASE_CONFIG);
+    auth = authMod.getAuth(app);
+    fbReady = true;
+    window.__fbReady = true;
+    $("#googleBtn").disabled = false;
+    $("#otpBtn").disabled = false;
+    authMod.onAuthStateChanged(auth, (u) => (u ? onSignedIn(u) : onSignedOut()));
+  } catch (e) {
+    console.error("Firebase failed to load:", e);
+    window.__fbError = String(e.message || e);
+    showToast("Couldn't load sign-in — check your connection.");
+    $("#googleBtn").innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Sign-in unavailable';
+    $("#otpBtn").innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Sign-in unavailable';
+  }
+})();
+
+/* ---------- Google ---------- */
+$("#googleBtn").addEventListener("click", async () => {
+  if (!fbReady || !authMod) return showToast("Sign-in is still loading…");
+  try {
+    await authMod.signInWithPopup(auth, new authMod.GoogleAuthProvider());
+  } catch (e) {
+    const c = e.code || "";
+    if (c === "auth/popup-blocked") showToast("Popup blocked — allow popups for this site and try again.");
+    else if (c === "auth/unauthorized-domain") showToast("This domain isn't allowed yet — add it in Firebase console → Authentication → Settings → Authorized domains.");
+    else if (c === "auth/popup-closed-by-user") { /* cancelled — silent */ }
+    else if (c === "auth/operation-not-allowed") showToast("Google sign-in isn't enabled in Firebase console yet.");
+    else showToast("Sign-in failed: " + c.replace("auth/", "").replace(/-/g, " "));
+  }
+});
+
+/* ---------- Phone (OTP) ---------- */
+$("#otpBtn").addEventListener("click", async () => {
+  if (!fbReady || !authMod) return showToast("Sign-in is still loading…");
+  const mobile = $("#authMobile").value.replace(/\D/g, "");
+  setErr("#fAuthMobile", false);
+  if (!/^[6-9]\d{9}$/.test(mobile)) { setErr("#fAuthMobile", true, "Enter a valid 10-digit mobile starting with 6–9."); return; }
+  const btn = $("#otpBtn");
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Sending code…';
+  try {
+    const verifier = new authMod.RecaptchaVerifier(auth, "recaptcha", { size: "invisible" });
+    otpConfirmation = await authMod.signInWithPhoneNumber(auth, "+91" + mobile, verifier);
+    $("#otpStep").hidden = false;
+    $("#verifyBtn").hidden = false;
+    btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Code sent to +91 ' + mobile;
+    showToast("OTP sent — enter the 6-digit code.");
+  } catch (e) {
+    const c = e.code || "";
+    if (c === "auth/unauthorized-domain") showToast("This domain isn't allowed for phone auth yet — add it in Firebase console → Authentication → Settings → Authorized domains.");
+    else if (c === "auth/operation-not-allowed") showToast("Phone sign-in isn't enabled in Firebase console yet.");
+    else if (c === "auth/quota-exceeded") showToast("SMS quota exceeded — try again later.");
+    else if (c === "auth/invalid-phone-number") setErr("#fAuthMobile", true, "That mobile number looks invalid.");
+    else showToast("Couldn't send code: " + (c ? c.replace("auth/", "").replace(/-/g, " ") : e.message));
+    btn.disabled = !fbReady;
+    btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send code';
+  }
+});
+$("#verifyBtn").addEventListener("click", async () => {
+  const code = $("#otpCode").value.trim();
+  if (!/^\d{6}$/.test(code)) return showToast("Enter the 6-digit code.");
+  const btn = $("#verifyBtn");
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Verifying…';
+  try {
+    await otpConfirmation.confirm(code);
+  } catch (e) {
+    const c = e.code || "";
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-check"></i> Verify &amp; continue';
+    if (c === "auth/invalid-verification-code") showToast("That code didn't match — check and try again.");
+    else showToast("Verification failed: " + (c ? c.replace("auth/", "").replace(/-/g, " ") : e.message));
+  }
+});
+
+/* ---------- form save ---------- */
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   const name = $("#inName").value.trim();
@@ -154,33 +306,29 @@ form.addEventListener("submit", async (e) => {
 
   state.name = name; state.mobile = mobile; state.email = email;
   try {
-    await T.profileAPI.save(state); // stub until real API is ready
+    await T.profileAPI.save(state, state.uid);
     showSaved();
-    showToast(state.email ? "Profile saved" : "Profile saved");
+    showToast("Profile saved");
   } catch (err) {
     console.error(err);
     showToast("Couldn't save right now — try again.");
   }
 });
 
-/* edit */
-$("#editBtn").addEventListener("click", () => {
-  $("#inName").value = state.name;
-  $("#inMobile").value = state.mobile;
-  $("#inEmail").value = state.email || "";
-  showForm();
+/* avatar picker + edit + sign out */
+document.querySelector(".avatar-row").addEventListener("click", (e) => {
+  const b = e.target.closest(".avatar-dot");
+  if (!b) return;
+  state.avatar = Number(b.dataset.i);
+  paintAvatar();
 });
-
-/* init: restore saved profile if any */
-(async () => {
-  const saved = await T.profileAPI.get().catch(() => null);
-  if (saved && saved.name && saved.mobile) {
-    state = Object.assign(state, saved);
-    showSaved();
-  } else {
-    paintAvatar();
-  }
-})();
+$("#editBtn").addEventListener("click", () => showForm());
+const doSignOut = async () => {
+  if (authMod && auth) { try { await authMod.signOut(auth); } catch (e) { console.error(e); } }
+  else showAuth();
+};
+$("#signOutBtn").addEventListener("click", doSignOut);
+$("#signOutBtn2").addEventListener("click", doSignOut);
 
 T.renderShell("profile");
 </script>

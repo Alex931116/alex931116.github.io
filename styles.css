@@ -65,6 +65,8 @@
 
 /* ---------- 2. Reset & Base ---------- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* hidden must always win over display:flex/inline-flex classes */
+[hidden] { display: none !important; }
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 body {
   font-family: var(--font);
@@ -783,6 +785,21 @@ body.has-dock { padding-bottom: 96px; }
 .field.err .input { border-color: #e5484d; }
 .field.err .hint { color: #e5484d; font-weight: 600; }
 .profile-form { width: 100%; display: flex; flex-direction: column; gap: 16px; }
+
+/* Firebase auth card */
+.auth-card { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.divider { display: flex; align-items: center; gap: 12px; width: 100%; color: var(--ink-400); font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.phone-row { display: flex; gap: 10px; width: 100%; }
+.phone-row .cc {
+  flex: none; display: grid; place-items: center; padding: 0 14px;
+  border: 1.5px solid var(--line); border-radius: var(--r-md);
+  background: #f4f7f5; font-weight: 800; font-size: var(--fs-sm); color: var(--ink-700);
+}
+.phone-row .input { flex: 1; }
+.signed-line { display: flex; align-items: center; gap: 8px; justify-content: center; font-size: var(--fs-xs); color: var(--ink-500); width: 100%; }
+.signed-line i { color: var(--brand-500); }
+.signed-line b { color: var(--ink-800); }
 
 .profile-ok { display: none; flex-direction: column; align-items: center; gap: 14px; width: 100%; }
 .profile-ok.show { display: flex; animation: fadeUp 0.5s var(--ease) both; }

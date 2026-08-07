@@ -363,15 +363,20 @@
   };
 
   /* ---------- profile stub (swap with real API when ready) ----------
-     profileAPI.get()  → { name, mobile, email, avatar } | null
-     profileAPI.save() → persisted profile object                             */
+     profileAPI.get(uid)  → { name, mobile, email, avatar } | null
+     profileAPI.save(p, uid) → persisted profile object
+     Data is stored per-user (keyed by Firebase uid).                     */
   const profileAPI = {
     KEY: "tv_profile_v1",
-    async get() {
-      try { const raw = localStorage.getItem(this.KEY); return raw ? JSON.parse(raw) : null; } catch (e) { return null; }
+    keyFor(uid) { return uid ? this.KEY + ":" + uid : this.KEY; },
+    async get(uid) {
+      try {
+        const raw = localStorage.getItem(this.keyFor(uid));
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) { return null; }
     },
-    async save(p) {
-      localStorage.setItem(this.KEY, JSON.stringify(p));
+    async save(p, uid) {
+      localStorage.setItem(this.keyFor(uid), JSON.stringify(p));
       return p;
     },
   };
