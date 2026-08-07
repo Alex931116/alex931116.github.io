@@ -107,19 +107,11 @@
 <div class="toast" id="toast"></div>
 
 <script src="app.js"></script>
+<script src="firebase.js"></script>
 <script>
 const T = window.Travel;
 
-/* ---------- Firebase (CDN modules — same SDK version as your snippet) ---------- */
-const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyAET8iPctXTXcPhTu4CtMLxZAZ-AXBZg2o",
-  authDomain: "vannilatravels-7e104.firebaseapp.com",
-  projectId: "vannilatravels-7e104",
-  storageBucket: "vannilatravels-7e104.firebasestorage.app",
-  messagingSenderId: "455786245355",
-  appId: "1:455786245355:web:122f64340e39f6e94762ae",
-};
-const SDK = "https://www.gstatic.com/firebasejs/12.17.1";
+/* ---------- Firebase (shared firebase.js bootstraps App + Auth + Firestore) ---------- */
 
 let auth = null, authMod = null, authUser = null, otpConfirmation = null, fbReady = false;
 
@@ -210,26 +202,21 @@ function onSignedOut() {
   showAuth();
 }
 
-/* ---------- Firebase bootstrap ---------- */
-(async () => {
-  try {
-    const appMod = await import(SDK + "/firebase-app.js");
-    authMod = await import(SDK + "/firebase-auth.js");
-    const app = appMod.initializeApp(FIREBASE_CONFIG);
-    auth = authMod.getAuth(app);
-    fbReady = true;
-    window.__fbReady = true;
-    $("#googleBtn").disabled = false;
-    $("#otpBtn").disabled = false;
-    authMod.onAuthStateChanged(auth, (u) => (u ? onSignedIn(u) : onSignedOut()));
-  } catch (e) {
-    console.error("Firebase failed to load:", e);
-    window.__fbError = String(e.message || e);
-    showToast("Couldn't load sign-in — check your connection.");
-    $("#googleBtn").innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Sign-in unavailable';
-    $("#otpBtn").innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Sign-in unavailable';
-  }
-})();
+/* ---------- Firebase bootstrap (shared firebase.js) ---------- */
+FB.ready.then(({ auth: a, authMod: m }) => {
+  auth = a; authMod = m;
+  fbReady = true;
+  window.__fbReady = true;
+  $("#googleBtn").disabled = false;
+  $("#otpBtn").disabled = false;
+  authMod.onAuthStateChanged(auth, (u) => (u ? onSignedIn(u) : onSignedOut()));
+}).catch((e) => {
+  console.error("Firebase failed to load:", e);
+  window.__fbError = String(e.message || e);
+  showToast("Couldn't load sign-in — check your connection.");
+  $("#googleBtn").innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Sign-in unavailable';
+  $("#otpBtn").innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Sign-in unavailable';
+});
 
 /* ---------- Google ---------- */
 $("#googleBtn").addEventListener("click", async () => {
@@ -239,7 +226,7 @@ $("#googleBtn").addEventListener("click", async () => {
   } catch (e) {
     const c = e.code || "";
     if (c === "auth/popup-blocked") showToast("Popup blocked — allow popups for this site and try again.");
-    else if (c === "auth/unauthorized-domain") showToast("This domain isn't allowed yet — add it in Firebase console → Authentication → Settings → Authorized domains.");
+    else if (c === "auth/unauthorized-domain") showToast('Add "' + location.hostname + '" in Firebase console → Authentication → Settings → Authorized domains, then reload.');
     else if (c === "auth/popup-closed-by-user") { /* cancelled — silent */ }
     else if (c === "auth/operation-not-allowed") showToast("Google sign-in isn't enabled in Firebase console yet.");
     else showToast("Sign-in failed: " + c.replace("auth/", "").replace(/-/g, " "));
@@ -264,7 +251,7 @@ $("#otpBtn").addEventListener("click", async () => {
     showToast("OTP sent — enter the 6-digit code.");
   } catch (e) {
     const c = e.code || "";
-    if (c === "auth/unauthorized-domain") showToast("This domain isn't allowed for phone auth yet — add it in Firebase console → Authentication → Settings → Authorized domains.");
+    if (c === "auth/unauthorized-domain") showToast('Add "' + location.hostname + '" in Firebase console → Authentication → Settings → Authorized domains, then reload.');
     else if (c === "auth/operation-not-allowed") showToast("Phone sign-in isn't enabled in Firebase console yet.");
     else if (c === "auth/quota-exceeded") showToast("SMS quota exceeded — try again later.");
     else if (c === "auth/invalid-phone-number") setErr("#fAuthMobile", true, "That mobile number looks invalid.");
@@ -331,6 +318,19 @@ $("#signOutBtn").addEventListener("click", doSignOut);
 $("#signOutBtn2").addEventListener("click", doSignOut);
 
 T.renderShell("profile");
+
+/* optional "back to destination" pill — arrive here from a details-page comment gate */
+(function () {
+  const params = new URLSearchParams(location.search);
+  const bid = params.get("id");
+  if (params.get("back") === "details" && bid) {
+    const pill = document.createElement("a");
+    pill.href = "details.html?id=" + encodeURIComponent(bid);
+    pill.className = "back-pill";
+    pill.innerHTML = '<i class="fa-solid fa-arrow-left"></i> Back to this destination';
+    document.body.appendChild(pill);
+  }
+})();
 </script>
 </body>
 </html>

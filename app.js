@@ -339,45 +339,112 @@
     return json;
   }
 
-  /* ---------- social stubs (swap with real API when ready) ----------
-     Replace the bodies of likeAPI.get/toggle with real fetch calls once the
-     likes endpoint exists. Keep the same return shape:
+  /* ---------- social: Firestore-backed with localStorage fallback ----------
+     Data model (see firestore.rules):
+       likes/{itemId}/likes/{uid}  → { uid, itemId, at }   (each user only their own)
+       users/{uid}                 → { name, mobile, email, avatar, updatedAt }
+     firebase.js provides window.FB. When Firebase is unavailable or the
+     visitor is signed out we fall back to localStorage so the UI keeps
+     working everywhere. Return shapes stay the same as before:
        get(id)    → { liked: boolean, count: number }
-       toggle(id) → { liked: boolean, count: number }  */
+       toggle(id) → { liked: boolean, count: number }      */
   const LS_LIKES = "tv_likes_v1";
+  const LS_LC = "tv_likes_count_v1";
   const hashNum = (s) => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h; };
   const likeBase = (id) => 120 + (hashNum(String(id)) % 380);
+  const countCache = (() => { try { return JSON.parse(localStorage.getItem(LS_LC) || "{}"); } catch (e) { return {}; } })();
+  const saveCountCache = () => { try { localStorage.setItem(LS_LC, JSON.stringify(countCache)); } catch (e) {} };
 
-  const likeAPI = {
-    async get(itemId) {
+  const localLikes = {
+    get(itemId) {
       const set = JSON.parse(localStorage.getItem(LS_LIKES) || "[]");
-      return { liked: set.includes(String(itemId)), count: likeBase(itemId) };
+      return { liked: set.includes(String(itemId)), count: countCache[itemId] || likeBase(itemId) };
     },
-    async toggle(itemId) {
+    toggle(itemId) {
       const set = JSON.parse(localStorage.getItem(LS_LIKES) || "[]");
       const key = String(itemId);
       const liked = !set.includes(key);
       localStorage.setItem(LS_LIKES, JSON.stringify(liked ? [...set, key] : set.filter((x) => x !== key)));
-      return { liked, count: likeBase(itemId) + (liked ? 1 : -1) };
+      countCache[key] = (countCache[key] || likeBase(itemId)) + (liked ? 1 : -1);
+      saveCountCache();
+      return { liked, count: countCache[key] };
     },
   };
 
-  /* ---------- profile stub (swap with real API when ready) ----------
-     profileAPI.get(uid)  → { name, mobile, email, avatar } | null
+  async function fbLikeState(itemId, uid) {
+    const { db, fs } = await FB.ready;
+    const [me, cnt] = await Promise.all([
+      fs.getDoc(fs.doc(db, "likes", String(itemId), "likes", uid)),
+      fs.getCountFromServer(fs.collection(db, "likes", String(itemId), "likes")),
+    ]);
+    countCache[itemId] = cnt.data().count;
+    saveCountCache();
+    return { liked: me.exists(), count: cnt.data().count };
+  }
+
+  const likeAPI = {
+    async get(itemId) {
+      const u = FB.currentUser();
+      if (u && FB.db) {
+        try { return await fbLikeState(itemId, u.uid); }
+        catch (e) { console.warn("like get fell back to local:", e); }
+      }
+      return localLikes.get(itemId);
+    },
+    async toggle(itemId) {
+      const u = FB.currentUser();
+      if (u && FB.db && FB.fs) {
+        try {
+          const { db, fs } = await FB.ready;
+          const ref = fs.doc(db, "likes", String(itemId), "likes", u.uid);
+          const me = await fs.getDoc(ref);
+          if (me.exists()) await fs.deleteDoc(ref);
+          else await fs.setDoc(ref, { uid: u.uid, itemId: String(itemId), at: fs.serverTimestamp() });
+          try { return await fbLikeState(itemId, u.uid); }
+          catch (e) {
+            const liked = !me.exists();
+            countCache[itemId] = (countCache[itemId] || likeBase(itemId)) + (liked ? 1 : -1);
+            saveCountCache();
+            return { liked, count: countCache[itemId] };
+          }
+        } catch (e) { console.warn("like toggle fell back to local:", e); }
+      }
+      return localLikes.toggle(itemId);
+    },
+  };
+
+  /* ---------- profile: Firestore users/{uid} + localStorage mirror ----------
+     profileAPI.get(uid)  → { name, mobile, email, avatar, ... } | null
      profileAPI.save(p, uid) → persisted profile object
-     Data is stored per-user (keyed by Firebase uid).                     */
+     Firestore wins when available; localStorage mirrors it for offline use
+     and doubles as a migration path for profiles saved before Firestore. */
   const profileAPI = {
     KEY: "tv_profile_v1",
     keyFor(uid) { return uid ? this.KEY + ":" + uid : this.KEY; },
+    localGet(uid) {
+      try { const raw = localStorage.getItem(this.keyFor(uid)); return raw ? JSON.parse(raw) : null; }
+      catch (e) { return null; }
+    },
     async get(uid) {
+      const local = this.localGet(uid);
+      if (!uid || !FB.currentUser() || !FB.db) return local;
       try {
-        const raw = localStorage.getItem(this.keyFor(uid));
-        return raw ? JSON.parse(raw) : null;
-      } catch (e) { return null; }
+        const { db, fs } = await FB.ready;
+        const snap = await fs.getDoc(fs.doc(db, "users", uid));
+        if (snap.exists()) return Object.assign({}, local, snap.data());
+      } catch (e) { console.warn("profile get fell back to local:", e); }
+      return local;
     },
     async save(p, uid) {
-      localStorage.setItem(this.keyFor(uid), JSON.stringify(p));
-      return p;
+      const safe = { name: String(p.name || ""), mobile: String(p.mobile || ""), email: String(p.email || ""), avatar: Number(p.avatar) || 0, uid: String(uid || "") };
+      try { localStorage.setItem(this.keyFor(uid), JSON.stringify(safe)); } catch (e) {}
+      if (uid && FB.currentUser() && FB.db) {
+        try {
+          const { db, fs } = await FB.ready;
+          await fs.setDoc(fs.doc(db, "users", uid), Object.assign({}, safe, { updatedAt: fs.serverTimestamp() }), { merge: true });
+        } catch (e) { console.warn("profile save stayed local only:", e); }
+      }
+      return safe;
     },
   };
 

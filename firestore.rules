@@ -1,0 +1,46 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- Profiles ----------
+    // Each user can read and write ONLY their own profile document.
+    match /users/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // ---------- Per-user search history ----------
+    // Each user reads/creates/deletes only their own entries. No updates.
+    match /users/{uid}/searches/{entry} {
+      allow read, create, delete: if request.auth != null && request.auth.uid == uid;
+      allow update: if false;
+    }
+
+    // ---------- Likes ----------
+    // One document per (place, user): likes/{itemId}/likes/{uid}.
+    // Anyone can read counts; only the owner can create/delete their own entry.
+    match /likes/{itemId}/likes/{uid} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.data.uid == uid
+        && request.resource.data.itemId == itemId
+        && request.resource.data.keys().hasOnly(['uid', 'itemId', 'at']);
+      allow delete: if request.auth != null && request.auth.uid == uid;
+      allow update: if false;
+    }
+
+    // ---------- Comments ----------
+    // Public read; signed-in users create with their own uid; only the
+    // author can edit or delete. Text is bounded to keep the board clean.
+    match /places/{placeId}/comments/{commentId} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.auth.uid == request.resource.data.uid
+        && request.resource.data.placeId == placeId
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 500
+        && request.resource.data.keys().hasOnly(['uid', 'name', 'text', 'placeId', 'at']);
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.uid;
+    }
+  }
+}

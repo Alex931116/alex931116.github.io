@@ -55,6 +55,7 @@
 </main>
 
 <script src="app.js"></script>
+<script src="firebase.js"></script>
 <script>
 const T = window.Travel;
 
@@ -76,6 +77,7 @@ async function build() {
         <div class="state-ico"><i class="fa-solid fa-magnifying-glass"></i></div>
         <h3 class="h3">What are you looking for?</h3>
         <p>Try a city, state, temple, museum or river.</p>
+        <div id="recentWrap" style="display:none;width:100%;margin-top:4px;"></div>
         <div class="tag-cloud" style="justify-content:center;margin-top:16px;max-width:600px;">
           ${["Prayagraj", "Mumbai", "Varanasi", "Temples", "Heritage", "Boat rides", "Museums", "Nature"]
             .map((t) => `<a class="chip" href="search.html?query=${encodeURIComponent(t)}"><i class="fa-solid fa-hashtag"></i>${t}</a>`).join("")}
@@ -83,11 +85,14 @@ async function build() {
       </div>`;
     if (searchInput) searchInput.value = "";
     if (focusFlag && searchInput) { searchInput.focus(); searchInput.select(); }
+    loadRecentSearches();
     return;
   }
 
   let target = q.replace(/prradesh/i, "Pradesh");
   if (searchInput) searchInput.value = target;
+
+  recordSearch(target);
 
   const results = await T.fetchSearch(target, 36);
   document.getElementById("mainTitle").textContent = `${target}, India`;
@@ -174,6 +179,50 @@ async function build() {
   });
 
   T.initReveal();
+}
+
+/* ---------------- search history (Firestore: users/{uid}/searches) ---------------- */
+async function recordSearch(q) {
+  try {
+    const user = FB.currentUser();
+    if (!user || !FB.db) return;
+    const { db, fs } = await FB.ready;
+    await fs.addDoc(fs.collection(db, "users", user.uid, "searches"), { q, at: fs.serverTimestamp() });
+  } catch (e) { console.warn("search record failed:", e); }
+}
+
+async function loadRecentSearches() {
+  const wrap = document.getElementById("recentWrap");
+  if (!wrap) return;
+  try {
+    const user = FB.currentUser();
+    if (!user || !FB.db) return;
+    const { db, fs } = await FB.ready;
+    const snap = await fs.getDocs(fs.query(
+      fs.collection(db, "users", user.uid, "searches"),
+      fs.orderBy("at", "desc"), fs.limit(12)));
+    const seen = new Set();
+    const items = [];
+    snap.docs.forEach((d) => { const q = d.data().q; if (q && !seen.has(q)) { seen.add(q); items.push(q); } });
+    if (!items.length) return;
+    wrap.style.display = "";
+    wrap.innerHTML = `
+      <div class="recent-head">
+        <span><i class="fa-solid fa-clock-rotate-left"></i> Recent searches</span>
+        <button class="recent-clear" id="recentClear">Clear</button>
+      </div>
+      <div class="tag-cloud" style="justify-content:center;max-width:600px;">
+        ${items.slice(0, 8).map((q) => `<a class="chip" href="search.html?query=${encodeURIComponent(q)}"><i class="fa-solid fa-hashtag"></i>${T.esc(q)}</a>`).join("")}
+      </div>`;
+    document.getElementById("recentClear").addEventListener("click", async () => {
+      try {
+        const col = fs.collection(db, "users", user.uid, "searches");
+        const all = await fs.getDocs(col);
+        await Promise.all(all.docs.map((d) => fs.deleteDoc(d.ref)));
+        wrap.style.display = "none";
+      } catch (e) { console.warn("clear history failed:", e); }
+    });
+  } catch (e) { console.warn("recent searches load failed:", e); }
 }
 
 build().catch((e) => {

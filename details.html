@@ -103,6 +103,26 @@
         <h3><i class="fa-solid fa-location-crosshairs"></i> Nearby attractions</h3>
         <div class="nearby-grid" id="nearbyGrid"></div>
       </div>
+
+      <!-- Comments (sign-in to post; author can delete) -->
+      <div class="detail-card">
+        <h3><i class="fa-regular fa-comments"></i> Comments <span class="comments-count" id="commentCount">0</span></h3>
+        <div class="comments">
+          <div class="comment-gate" id="commentGate">
+            <p>Signed-in travellers can share tips and ask questions.</p>
+            <a class="btn btn-primary" id="commentGateLink" href="profile.html"><i class="fa-regular fa-circle-user"></i> Sign in to comment</a>
+          </div>
+          <div class="comment-composer" id="commentComposer" hidden>
+            <textarea id="commentInput" rows="2" maxlength="500" placeholder="Share a tip or ask a question…"></textarea>
+            <div class="composer-actions">
+              <span class="comment-as" id="commentAs"></span>
+              <button class="btn btn-primary" id="commentPost"><i class="fa-solid fa-paper-plane"></i> Post</button>
+            </div>
+          </div>
+          <div class="comment-empty" id="commentEmpty" hidden>No comments yet — be the first!</div>
+          <div class="comment-list" id="commentList"></div>
+        </div>
+      </div>
     </div>
 
     <!-- Side column (sticky on desktop) -->
@@ -145,7 +165,11 @@
   <button class="btn btn-primary" id="planBtnMobile"><i class="fa-solid fa-map-location-dot"></i> Plan visit</button>
 </div>
 
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
 <script src="app.js"></script>
+<script src="firebase.js"></script>
 <script>
 const T = window.Travel;
 const id = new URLSearchParams(location.search).get("id");
@@ -290,6 +314,123 @@ load().catch((e) => {
 });
 
 T.renderShell("explore", { back: true });
+
+/* ---------------- comments (Firestore: places/{id}/comments) ---------------- */
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(t._h);
+  t._h = setTimeout(() => t.classList.remove("show"), 2800);
+}
+
+function timeAgo(t) {
+  let ms = 0;
+  if (!t) return "just now";
+  if (typeof t.toMillis === "function") ms = t.toMillis();
+  else if (typeof t.toDate === "function") ms = t.toDate().getTime();
+  else if (typeof t === "number") ms = t;
+  if (!ms) return "just now";
+  const s = Math.floor((Date.now() - ms) / 1000);
+  if (s < 60) return "just now";
+  if (s < 3600) return Math.floor(s / 60) + "m ago";
+  if (s < 86400) return Math.floor(s / 3600) + "h ago";
+  if (s < 604800) return Math.floor(s / 86400) + "d ago";
+  return new Date(ms).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+}
+
+async function deleteComment(placeId, commentId) {
+  const user = FB.currentUser();
+  if (!user) return;
+  try {
+    const { db, fs } = await FB.ready;
+    await fs.deleteDoc(fs.doc(db, "places", String(placeId), "comments", commentId));
+  } catch (e) { console.error(e); showToast("Couldn't delete — try again."); }
+}
+
+function initComments(placeId) {
+  const box = document.getElementById("commentsBox") || document.querySelector(".comments");
+  if (!box || !placeId) return;
+  const list = document.getElementById("commentList");
+  const empty = document.getElementById("commentEmpty");
+  const gate = document.getElementById("commentGate");
+  const composer = document.getElementById("commentComposer");
+  const input = document.getElementById("commentInput");
+  const postBtn = document.getElementById("commentPost");
+  const countEl = document.getElementById("commentCount");
+  const gateLink = document.getElementById("commentGateLink");
+  if (gateLink) gateLink.href = "profile.html?back=details&id=" + encodeURIComponent(placeId);
+
+  const render = (docs) => {
+    list.innerHTML = docs.length
+      ? docs.map((d) => {
+          const c = d.data();
+          const me = FB.currentUser();
+          const mine = !!me && me.uid === c.uid;
+          const name = T.esc(c.name || "Traveller");
+          return `<div class="comment-item">
+            <div class="comment-avatar">${T.esc(String((c.name || "T")[0] || "?").toUpperCase())}</div>
+            <div class="comment-body">
+              <div class="comment-head"><span class="comment-name">${name}</span><span class="comment-time">${timeAgo(c.at)}</span></div>
+              <p class="comment-text">${T.esc(c.text)}</p>
+            </div>
+            ${mine ? `<button class="comment-del" data-id="${T.esc(d.id)}" aria-label="Delete your comment"><i class="fa-solid fa-trash-can"></i></button>` : ""}
+          </div>`;
+        }).join("")
+      : "";
+    empty.hidden = docs.length > 0;
+    if (countEl) countEl.textContent = docs.length;
+    list.querySelectorAll(".comment-del").forEach((b) =>
+      b.addEventListener("click", () => deleteComment(placeId, b.dataset.id)));
+  };
+
+  const refreshAuth = (user) => {
+    const signed = !!user;
+    if (gate) gate.hidden = signed;
+    if (composer) composer.hidden = !signed;
+    if (signed) {
+      const who = document.getElementById("commentAs");
+      if (who) who.textContent = "Posting as " + (user.displayName || user.email || user.phoneNumber || "Traveller");
+    }
+  };
+
+  /* live comment list (public read) + auth-gated composer */
+  FB.onUser(refreshAuth);
+  FB.ready.then(({ db, fs }) => {
+    const col = fs.collection(db, "places", String(placeId), "comments");
+    fs.onSnapshot(fs.query(col, fs.orderBy("at", "desc"), fs.limit(50)), (snap) => render(snap.docs), (err) => {
+      console.warn("comments live load failed:", err);
+      list.innerHTML = `<p class="muted" style="font-size:var(--fs-sm);">Couldn't load comments.</p>`;
+    });
+  }).catch((e) => console.warn("comments unavailable:", e));
+
+  if (postBtn) postBtn.addEventListener("click", async () => {
+    const text = input.value.trim();
+    const user = FB.currentUser();
+    if (!text || !user) return;
+    if (text.length > 500) return showToast("Keep comments under 500 characters.");
+    postBtn.disabled = true;
+    try {
+      const { db, fs } = await FB.ready;
+      await fs.addDoc(fs.collection(db, "places", String(placeId), "comments"), {
+        uid: user.uid,
+        name: user.displayName || user.email || user.phoneNumber || "Traveller",
+        text,
+        placeId: String(placeId),
+        at: fs.serverTimestamp(),
+      });
+      input.value = "";
+    } catch (e) {
+      console.error(e);
+      showToast("Couldn't post — check your connection.");
+    } finally {
+      postBtn.disabled = false;
+    }
+  });
+}
+
+initComments(id);
 </script>
 </body>
 </html>
