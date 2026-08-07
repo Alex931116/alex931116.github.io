@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Travella — My Profile</title>
+<meta name="description" content="Your Travella profile — name, mobile number and email.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://tourandtravels-nine.vercel.app" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+<link href="styles.css" rel="stylesheet">
+</head>
+<body>
+
+<main class="container profile-wrap">
+  <span class="eyebrow" style="display:inline-flex;margin-bottom:10px;"><i class="fa-solid fa-circle-user"></i> Account</span>
+  <h1 class="h1" style="margin-bottom:4px;">My profile</h1>
+  <p class="muted" style="margin-bottom:clamp(18px,3vw,28px);">Name and mobile are required — email is optional.</p>
+
+  <div class="profile-card" id="profileCard">
+
+    <!-- avatar -->
+    <div class="profile-avatar" id="avatar" style="background:linear-gradient(135deg,#00a06b,#005a3c);">
+      <i class="fa-regular fa-circle-user" id="avatarIco"></i>
+      <span id="avatarText" style="display:none;"></span>
+    </div>
+    <div class="avatar-row" id="avatarRow" hidden>
+      <button class="avatar-dot sel" data-i="0" style="background:linear-gradient(135deg,#00a06b,#005a3c);" aria-label="Green avatar"></button>
+      <button class="avatar-dot" data-i="1" style="background:linear-gradient(135deg,#ff8c42,#e5484d);" aria-label="Orange avatar"></button>
+      <button class="avatar-dot" data-i="2" style="background:linear-gradient(135deg,#5b8def,#3f3f99);" aria-label="Blue avatar"></button>
+      <button class="avatar-dot" data-i="3" style="background:linear-gradient(135deg,#8e5bd0,#5b2d90);" aria-label="Purple avatar"></button>
+      <button class="avatar-dot" data-i="4" style="background:linear-gradient(135deg,#00b4a6,#0d5c5c);" aria-label="Teal avatar"></button>
+      <button class="avatar-dot" data-i="5" style="background:linear-gradient(135deg,#f0b429,#d97706);" aria-label="Amber avatar"></button>
+    </div>
+
+    <!-- form -->
+    <form class="profile-form" id="profileForm">
+      <div class="field" id="fName">
+        <label for="inName">Full name <span class="req">*</span></label>
+        <input class="input" id="inName" type="text" placeholder="e.g. Aarav Sharma" autocomplete="name" maxlength="60">
+        <span class="hint">Required</span>
+      </div>
+
+      <div class="field" id="fMobile">
+        <label for="inMobile">Mobile number <span class="req">*</span></label>
+        <input class="input" id="inMobile" type="tel" inputmode="numeric" placeholder="10-digit mobile number" autocomplete="tel" maxlength="15">
+        <span class="hint">Required · 10 digits, Indian mobile</span>
+      </div>
+
+      <div class="field" id="fEmail">
+        <label for="inEmail">Email <span style="color:var(--ink-400);">(optional)</span></label>
+        <input class="input" id="inEmail" type="email" placeholder="you@example.com" autocomplete="email" maxlength="120">
+        <span class="hint">We'll never share your details.</span>
+      </div>
+
+      <button class="btn btn-primary" type="submit" style="width:100%;"><i class="fa-solid fa-floppy-disk"></i> Save profile</button>
+      <p class="muted" style="font-size:var(--fs-xs);text-align:center;margin:0;">Profile sync activates once the server API is ready — for now it's stored on this device.</p>
+    </form>
+
+    <!-- saved state -->
+    <div class="profile-ok" id="profileOk">
+      <div style="font-size:var(--fs-sm);color:var(--ink-500);"><i class="fa-solid fa-circle-check" style="color:var(--brand-500);"></i> Profile saved</div>
+      <div class="ok-row"><i class="fa-solid fa-user"></i><div><b id="okName"></b><span>Name</span></div></div>
+      <div class="ok-row"><i class="fa-solid fa-mobile-screen"></i><div><b id="okMobile"></b><span>Mobile number</span></div></div>
+      <div class="ok-row" id="okEmailRow"><i class="fa-solid fa-envelope"></i><div><b id="okEmail"></b><span>Email</span></div></div>
+      <button class="btn btn-ghost" id="editBtn" style="width:100%;"><i class="fa-solid fa-pen"></i> Edit profile</button>
+    </div>
+
+  </div>
+</main>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+<script>
+const T = window.Travel;
+
+const GRADS = [
+  "linear-gradient(135deg,#00a06b,#005a3c)",
+  "linear-gradient(135deg,#ff8c42,#e5484d)",
+  "linear-gradient(135deg,#5b8def,#3f3f99)",
+  "linear-gradient(135deg,#8e5bd0,#5b2d90)",
+  "linear-gradient(135deg,#00b4a6,#0d5c5c)",
+  "linear-gradient(135deg,#f0b429,#d97706)",
+];
+
+const $ = (s) => document.querySelector(s);
+const avatar = $("#avatar"), avatarText = $("#avatarText"), avatarIco = $("#avatarIco");
+const form = $("#profileForm"), ok = $("#profileOk"), avatarRow = $("#avatarRow");
+
+let state = { name: "", mobile: "", email: "", avatar: 0 };
+
+function initials(name) {
+  return String(name || "").trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join("").toUpperCase() || "?";
+}
+function paintAvatar() {
+  avatar.style.background = GRADS[state.avatar] || GRADS[0];
+  if (state.name) { avatarText.textContent = initials(state.name); avatarText.style.display = ""; avatarIco.style.display = "none"; }
+  else { avatarText.style.display = "none"; avatarIco.style.display = ""; }
+  document.querySelectorAll(".avatar-dot").forEach((d) => d.classList.toggle("sel", Number(d.dataset.i) === state.avatar));
+}
+function showToast(msg) {
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(t._h);
+  t._h = setTimeout(() => t.classList.remove("show"), 2400);
+}
+
+function showForm() {
+  form.style.display = ""; ok.classList.remove("show"); avatarRow.hidden = false;
+}
+function showSaved() {
+  form.style.display = "none"; ok.classList.add("show"); avatarRow.hidden = true;
+  $("#okName").textContent = state.name;
+  $("#okMobile").textContent = "+91 " + state.mobile;
+  if (state.email) { $("#okEmail").textContent = state.email; $("#okEmailRow").style.display = ""; }
+  else $("#okEmailRow").style.display = "none";
+  paintAvatar();
+}
+
+/* avatar picker */
+avatarRow.addEventListener("click", (e) => {
+  const b = e.target.closest(".avatar-dot");
+  if (!b) return;
+  state.avatar = Number(b.dataset.i);
+  paintAvatar();
+});
+
+/* validation */
+const setErr = (id, on, msg) => {
+  const f = $(id);
+  f.classList.toggle("err", on);
+  if (on) f.querySelector(".hint").textContent = msg;
+  else if (id === "#fName") f.querySelector(".hint").textContent = "Required";
+  else if (id === "#fMobile") f.querySelector(".hint").textContent = "Required · 10 digits, Indian mobile";
+  else f.querySelector(".hint").textContent = "We'll never share your details.";
+};
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const name = $("#inName").value.trim();
+  const mobile = $("#inMobile").value.replace(/[\s\-+()]/g, "");
+  const email = $("#inEmail").value.trim().toLowerCase();
+
+  let okAll = true;
+  setErr("#fName", false); setErr("#fMobile", false); setErr("#fEmail", false);
+  if (name.length < 2) { setErr("#fName", true, "Please enter your full name."); okAll = false; }
+  if (!/^[6-9]\d{9}$/.test(mobile)) { setErr("#fMobile", true, "Enter a valid 10-digit mobile starting with 6–9."); okAll = false; }
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { setErr("#fEmail", true, "That email doesn't look right."); okAll = false; }
+  if (!okAll) return;
+
+  state.name = name; state.mobile = mobile; state.email = email;
+  try {
+    await T.profileAPI.save(state); // stub until real API is ready
+    showSaved();
+    showToast(state.email ? "Profile saved" : "Profile saved");
+  } catch (err) {
+    console.error(err);
+    showToast("Couldn't save right now — try again.");
+  }
+});
+
+/* edit */
+$("#editBtn").addEventListener("click", () => {
+  $("#inName").value = state.name;
+  $("#inMobile").value = state.mobile;
+  $("#inEmail").value = state.email || "";
+  showForm();
+});
+
+/* init: restore saved profile if any */
+(async () => {
+  const saved = await T.profileAPI.get().catch(() => null);
+  if (saved && saved.name && saved.mobile) {
+    state = Object.assign(state, saved);
+    showSaved();
+  } else {
+    paintAvatar();
+  }
+})();
+
+T.renderShell("profile");
+</script>
+</body>
+</html>

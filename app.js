@@ -77,6 +77,15 @@
     return max ? arr.slice(0, max) : arr;
   };
 
+  /* All media for a place: images first (capped), then every real video —
+     videos are never cut off even when the gallery is large. */
+  const mediaOf = (item, maxImgs) => {
+    const all = [item.thumbnail, ...(Array.isArray(item.videourl) ? item.videourl : [])].filter(Boolean);
+    const imgs = all.filter((u) => !isVideoUrl(u));
+    const vids = all.filter(isVideoUrl);
+    return [...imgs.slice(0, maxImgs || 12), ...vids];
+  };
+
   /* ---------- media / text helpers ---------- */
   const isVideoUrl = (u) => {
     if (!u) return false;
@@ -109,7 +118,7 @@
     return `
     <a class="dcard" href="details.html?id=${encodeURIComponent(item.id)}" data-title="${esc(item.title)}">
       <div class="media">
-        <img src="${esc(item.thumbnail)}" alt="${esc(item.title)}" loading="lazy"
+        <img src="${esc(item.thumbnail)}" alt="${esc(item.title)}" loading="lazy" decoding="async"
              onerror="this.onerror=null;this.src='${FALLBACK_IMG}';">
         <span class="cat-badge">${esc(tag)}</span>
         <span class="heart" role="button" aria-label="Save" onclick="event.preventDefault();this.classList.toggle('on');this.querySelector('i').classList.toggle('fa-solid');">
@@ -136,7 +145,7 @@
     const price = fmtPrice(item.ticket_prices && item.ticket_prices.indian);
     return `
     <a class="rrow" href="details.html?id=${encodeURIComponent(item.id)}">
-      <img class="thumb" src="${esc(item.thumbnail)}" alt="${esc(item.title)}" loading="lazy"
+      <img class="thumb" src="${esc(item.thumbnail)}" alt="${esc(item.title)}" loading="lazy" decoding="async"
            onerror="this.onerror=null;this.src='${FALLBACK_IMG}';">
       <div class="rbody">
         <div class="rtitle">${esc(item.title)}</div>
@@ -150,13 +159,31 @@
     </a>`;
   }
 
+  /* Bento media card — used by "Recent collection" (image-first, scrim + overlay text) */
+  function bentoHTML(item) {
+    const { rating } = ratingFor(item.id);
+    const price = fmtPrice(item.ticket_prices && item.ticket_prices.indian);
+    return `
+    <a class="b-item" href="details.html?id=${encodeURIComponent(item.id)}" data-title="${esc(item.title)}">
+      <img src="${esc(item.thumbnail)}" alt="${esc(item.title)}" loading="lazy" decoding="async"
+           onerror="this.onerror=null;this.src='${FALLBACK_IMG}';">
+      <span class="b-scrim"></span>
+      <span class="b-price ${Number(item.ticket_prices?.indian) ? "" : "free"}">${esc(price)}</span>
+      <span class="b-rate"><i class="fa-solid fa-star"></i>${rating}</span>
+      <div class="b-meta">
+        <h3 class="b-title">${esc(item.title)}</h3>
+        <div class="b-loc"><i class="fa-solid fa-location-dot"></i>${esc(shortLoc(item))}</div>
+      </div>
+    </a>`;
+  }
+
   /* ---------- skeleton builders ---------- */
   const skCard = () => `
     <div class="sk-card">
-      <div class="sk" style="height:120px;border-radius:14px;"></div>
-      <div class="sk" style="height:12px;width:80%;"></div>
-      <div class="sk" style="height:10px;width:55%;"></div>
-      <div class="sk" style="height:10px;width:65%;"></div>
+      <div class="sk sk-img"></div>
+      <div class="sk" style="height:12px;width:82%;"></div>
+      <div class="sk" style="height:10px;width:58%;"></div>
+      <div class="sk" style="height:10px;width:70%;"></div>
     </div>`;
   const skCards = (n) => Array.from({ length: n }, skCard).join("");
 
@@ -170,6 +197,12 @@
       <div class="sk" style="width:52px;height:14px;border-radius:20px;"></div>
     </div>`;
   const skRows = (n) => Array.from({ length: n }, skRow).join("");
+
+  /* bento placeholders keep the exact final layout (no layout shift) */
+  const skBento = (n) => Array.from({ length: n }, () => `
+    <div class="b-item">
+      <div class="sk" style="position:absolute;inset:0;border-radius:0;"></div>
+    </div>`).join("");
 
   /* ---------- nav shells ---------- */
   const NAV_ITEMS = [
@@ -207,7 +240,7 @@
         ${searchBox}
         <div class="d-flex" style="display:flex;align-items:center;gap:8px;">
           <a class="icon-btn" href="search.html?focus=1" data-search-nav aria-label="Search"><i class="fa-solid fa-magnifying-glass"></i></a>
-          <button class="icon-btn" aria-label="Notifications"><i class="fa-regular fa-bell"></i></button>
+          <a class="icon-btn ${active === "profile" ? "active" : ""}" href="profile.html" aria-label="Profile"><i class="fa-regular fa-circle-user"></i></a>
         </div>
       </div>
     </header>`;
@@ -220,7 +253,7 @@
       <a href="search.html?query=Uttar%20Pradesh" class="${active === "explore" ? "active" : ""}" aria-label="Explore"><i class="fa-regular fa-compass"></i></a>
       <a href="page2.html" class="dock-cta ${active === "tours" ? "active" : ""}" aria-label="Tours"><i class="fa-solid fa-plus"></i></a>
       <a href="all.html" class="${active === "all" ? "active" : ""}" aria-label="Destinations"><i class="fa-regular fa-heart"></i></a>
-      <a href="#profile" class="${active === "profile" ? "active" : ""}" aria-label="Profile"><i class="fa-regular fa-circle-user"></i></a>
+      <a href="profile.html" class="${active === "profile" ? "active" : ""}" aria-label="Profile"><i class="fa-regular fa-circle-user"></i></a>
     </nav>`;
   }
 
@@ -261,23 +294,87 @@
     });
   }
 
-  /* ---------- data fetchers ---------- */
+  /* ---------- data fetchers (with 5-min in-tab cache for faster loads) ---------- */
+  const cacheGet = (key) => {
+    try {
+      const raw = sessionStorage.getItem("tv_cache:" + key);
+      if (!raw) return null;
+      const o = JSON.parse(raw);
+      if (Date.now() - o.t > 5 * 60 * 1000) return null;
+      return o.d;
+    } catch (e) { return null; }
+  };
+  const cacheSet = (key, data) => {
+    try { sessionStorage.setItem("tv_cache:" + key, JSON.stringify({ t: Date.now(), d: data })); } catch (e) {}
+  };
+
   async function fetchList(category, page) {
+    const key = `list:${category}:${page || 1}`;
+    const hit = cacheGet(key);
+    if (hit) return hit;
     const res = await fetch(`${API}/sundarikanya1?category=${encodeURIComponent(category)}&page=${page || 1}`);
     const json = await res.json();
-    return json.data || [];
+    const data = json.data || [];
+    cacheSet(key, data);
+    return data;
   }
 
   async function fetchSearch(query, limit) {
+    const key = `search:${query}:${limit || 36}`;
+    const hit = cacheGet(key);
+    if (hit) return hit;
     const res = await fetch(`${API}/search?query=${encodeURIComponent(query)}&page=1&limit=${limit || 36}`);
     const json = await res.json();
-    return json.data || [];
+    const data = json.data || [];
+    cacheSet(key, data);
+    return data;
   }
 
   async function fetchPlace(id) {
-    const res = await fetch(`${API}/sundarikanya?id=${encodeURIComponent(id)}`);
-    return res.json();
+    const key = `place:${id}`;
+    const hit = cacheGet(key);
+    if (hit) return hit;
+    const json = await (await fetch(`${API}/sundarikanya?id=${encodeURIComponent(id)}`)).json();
+    cacheSet(key, json);
+    return json;
   }
+
+  /* ---------- social stubs (swap with real API when ready) ----------
+     Replace the bodies of likeAPI.get/toggle with real fetch calls once the
+     likes endpoint exists. Keep the same return shape:
+       get(id)    → { liked: boolean, count: number }
+       toggle(id) → { liked: boolean, count: number }  */
+  const LS_LIKES = "tv_likes_v1";
+  const hashNum = (s) => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h; };
+  const likeBase = (id) => 120 + (hashNum(String(id)) % 380);
+
+  const likeAPI = {
+    async get(itemId) {
+      const set = JSON.parse(localStorage.getItem(LS_LIKES) || "[]");
+      return { liked: set.includes(String(itemId)), count: likeBase(itemId) };
+    },
+    async toggle(itemId) {
+      const set = JSON.parse(localStorage.getItem(LS_LIKES) || "[]");
+      const key = String(itemId);
+      const liked = !set.includes(key);
+      localStorage.setItem(LS_LIKES, JSON.stringify(liked ? [...set, key] : set.filter((x) => x !== key)));
+      return { liked, count: likeBase(itemId) + (liked ? 1 : -1) };
+    },
+  };
+
+  /* ---------- profile stub (swap with real API when ready) ----------
+     profileAPI.get()  → { name, mobile, email, avatar } | null
+     profileAPI.save() → persisted profile object                             */
+  const profileAPI = {
+    KEY: "tv_profile_v1",
+    async get() {
+      try { const raw = localStorage.getItem(this.KEY); return raw ? JSON.parse(raw) : null; } catch (e) { return null; }
+    },
+    async save(p) {
+      localStorage.setItem(this.KEY, JSON.stringify(p));
+      return p;
+    },
+  };
 
   /* ---------- reveal on scroll ---------- */
   function initReveal() {
@@ -322,12 +419,12 @@
       .map((s, i) => `
         <div class="carousel-slide ${s.video ? "is-video" : ""}" role="group" aria-label="Slide ${i + 1}">
           ${s.video
-            ? `<video src="${esc(s.src)}" controls playsinline preload="metadata"></video>`
-            : `<img src="${esc(s.src)}" alt="" loading="${i === 0 ? "eager" : "lazy"}" onerror="this.onerror=null;this.src='${FALLBACK_IMG}';"></img>`}
+            ? `<video src="${esc(s.src)}" controls playsinline preload="metadata" muted loop></video>`
+            : `<img src="${esc(s.src)}" alt="" loading="${i === 0 ? "eager" : "lazy"}" decoding="async" onerror="this.onerror=null;this.src='${FALLBACK_IMG}';"></img>`}
         </div>`)
       .join("");
 
-    /* video error fallback */
+    /* video error fallback + autoplay wiring */
     track.querySelectorAll("video").forEach((v) => {
       v.addEventListener("error", () => {
         const slide = v.closest(".carousel-slide");
@@ -357,10 +454,16 @@
       track.style.transform = `translateX(-${idx * 100}%)`;
       if (counterEl) counterEl.textContent = idx + 1;
       dots.forEach((d, k) => d.classList.toggle("active", k === idx));
-      track.querySelectorAll("video").forEach((v) => v.pause());
       const cur = track.children[idx];
-      if (cur && cur.querySelector("video")) stop();
-      else play();
+      const curVideo = cur ? cur.querySelector("video") : null;
+      track.querySelectorAll("video").forEach((v) => { if (v !== curVideo) v.pause(); });
+      if (curVideo) {
+        stop(); // no slideshow timer while a video is playing
+        curVideo.muted = true; // autoplay with sound is blocked by browsers
+        curVideo.play().catch(() => {});
+      } else {
+        play();
+      }
       if (opts.onchange) opts.onchange(idx, list);
     }
 
@@ -426,12 +529,13 @@
     API, FALLBACK_IMG,
     esc, qs, qsa,
     fmtPrice, fmtTime, timeRange, ratingFor, dotsHtml,
-    tagsOf, shortLoc, shortTitle, daysCount, imagesOf,
+    tagsOf, shortLoc, shortTitle, daysCount, imagesOf, mediaOf,
     isVideoUrl, slideOf, shuffle, excerpt,
-    cardHTML, rowHTML, skCards, skRows,
+    cardHTML, rowHTML, bentoHTML, skCards, skRows, skBento,
     topNav, bottomDock, renderShell, wireTopSearch, wireSearchIcon,
     createCarousel, stagger,
     fetchList, fetchSearch, fetchPlace,
+    likeAPI, profileAPI,
     initReveal,
   };
 })();

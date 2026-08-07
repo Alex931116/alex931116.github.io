@@ -7,6 +7,9 @@
 <meta name="description" content="Handpicked temples, ghats, museums and wonders across India — rated by real travellers.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://tourandtravels-nine.vercel.app" crossorigin>
+<link rel="preconnect" href="https://ik.imagekit.io">
+<link rel="dns-prefetch" href="https://tourandtravels-nine.vercel.app">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
 <link href="styles.css" rel="stylesheet">
@@ -112,7 +115,7 @@
       </div>
       <a class="view-all" href="all.html">View all <i class="fa-solid fa-arrow-right"></i></a>
     </div>
-    <div class="grid grid--wide" id="recentGrid"></div>
+    <div class="bento" id="recentGrid"></div>
   </section>
 
   <!-- ================= FOOTER ================= -->
@@ -200,18 +203,18 @@
   loadNearby();
   document.getElementById("retryNearby").addEventListener("click", loadNearby);
 
-  /* Recent collection */
+  /* Recent collection — bento grid (image-first overlay cards) */
   (async () => {
     const grid = document.getElementById("recentGrid");
-    grid.innerHTML = T.skRows(6);
+    grid.innerHTML = T.skBento(7);
     try {
       const res = await fetch(`${T.API}/sundarikanya?tag=&page=1`);
       const json = await res.json();
-      const items = json.data || [];
-      grid.innerHTML = items.length ? items.map(T.rowHTML).join("") : "";
+      const list = (json.data || []).slice(0, 7);
+      grid.innerHTML = list.length ? list.map(T.bentoHTML).join("") : "";
     } catch (e) {
       console.error(e);
-      grid.innerHTML = `<div class="state-box"><div class="state-ico"><i class="fa-solid fa-cloud-bolt"></i></div><p>Couldn't load the collection.</p></div>`;
+      grid.innerHTML = `<div class="state-box" style="grid-column:1/-1;"><div class="state-ico"><i class="fa-solid fa-cloud-bolt"></i></div><p>Couldn't load the collection.</p></div>`;
     }
   })();
 

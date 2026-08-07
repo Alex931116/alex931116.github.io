@@ -7,6 +7,9 @@
 <meta name="description" content="Live entry fees, opening hours, maps and galleries for Indian destinations.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://tourandtravels-nine.vercel.app" crossorigin>
+<link rel="preconnect" href="https://ik.imagekit.io">
+<link rel="dns-prefetch" href="https://tourandtravels-nine.vercel.app">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
 <link href="styles.css" rel="stylesheet">
@@ -55,6 +58,7 @@
   <div class="details-top anim-in">
     <div id="heroCarousel" class="carousel-fill"></div>
     <a class="back-float" href="javascript:history.length>1?history.back():location.href='index.html'" aria-label="Back"><i class="fa-solid fa-arrow-left"></i></a>
+    <button class="like-float" id="likeBtn" aria-label="Like this place"><i class="fa-regular fa-heart"></i><b id="likeCount">—</b></button>
     <button class="share-float" id="shareBtn" aria-label="Share"><i class="fa-solid fa-share-nodes"></i></button>
   </div>
 
@@ -210,15 +214,16 @@ async function load() {
   document.getElementById("planBtnMobile").onclick = () => window.open(mapUrl, "_blank");
   document.getElementById("ctaBar").hidden = false;
 
-  /* images + videos: sliding hero carousel, clickable gallery rail */
-  const imgs = T.imagesOf(data, 10);
-  heroCarousel = T.createCarousel(document.getElementById("heroCarousel"), imgs.map(T.slideOf), {
+  /* images + videos: sliding hero carousel, clickable gallery rail.
+     mediaOf keeps every real video even when there are many images. */
+  const media = T.mediaOf(data, 12);
+  heroCarousel = T.createCarousel(document.getElementById("heroCarousel"), media.map(T.slideOf), {
     counter: true, counterPos: "bottom-right", dots: true, interval: 4500,
   });
   window.__heroGo = (i) => heroCarousel && heroCarousel.goTo(i);
-  document.getElementById("galleryRail").innerHTML = imgs
+  document.getElementById("galleryRail").innerHTML = media
     .map((src, i) => T.isVideoUrl(src)
-      ? `<div class="g-thumb" role="button" aria-label="Play video" onclick="window.__heroGo(${i})"><i class="fa-solid fa-circle-play"></i></div>`
+      ? `<div class="g-thumb" role="button" aria-label="Play video ${i + 1}" onclick="window.__heroGo(${i})"><i class="fa-solid fa-circle-play"></i></div>`
       : `<img src="${T.esc(src)}" loading="lazy" role="button" aria-label="Open slide ${i + 1}" onclick="window.__heroGo(${i})" onerror="this.onerror=null;this.src='${T.FALLBACK_IMG}';"></img>`)
     .join("");
 
@@ -257,6 +262,26 @@ async function load() {
     if (navigator.share) navigator.share({ title: data.title, url: location.href });
     else window.prompt("Copy link:", location.href);
   };
+
+  /* like — wired through T.likeAPI (stub until the real endpoint is ready) */
+  const likeBtn = document.getElementById("likeBtn");
+  const likeCount = document.getElementById("likeCount");
+  let likeState = { liked: false, count: 0 };
+  const syncLike = () => {
+    likeBtn.classList.toggle("on", likeState.liked);
+    likeBtn.querySelector("i").className = likeState.liked ? "fa-solid fa-heart" : "fa-regular fa-heart";
+    likeCount.textContent = likeState.count.toLocaleString("en-IN");
+  };
+  T.likeAPI.get(id).then((s) => { likeState = s; syncLike(); }).catch(() => {});
+  likeBtn.addEventListener("click", () => {
+    const prev = likeState.liked;
+    likeState.liked = !prev; // optimistic
+    likeState.count += likeState.liked ? 1 : -1;
+    syncLike();
+    T.likeAPI.toggle(id).then((s) => { likeState = s; syncLike(); }).catch(() => {
+      likeState.liked = prev; likeState.count = likeState.liked ? likeState.count - 1 : likeState.count + 1; syncLike();
+    });
+  });
 }
 
 load().catch((e) => {
